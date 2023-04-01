@@ -1,2 +1,3 @@
-# docs-slack-bot
-The home for the Spectro Cloud Slack Bot
+# Docs Slack Bot
+
+The home for the Spectro Cloud Slack Bot :robot: 
