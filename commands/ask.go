@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -20,11 +21,14 @@ import (
 func AskCmd(s *SlackRoute, private bool) ([]byte, error) {
 
 	// Check if a conversation already exists for this user.
-	_, err := getConversationID(s.ctx, s)
+	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
 		log.Debug().Err(err).Msgf("an error occured when checking for an exiting conversation: %+v", s.SlackEvent)
 		return nil, err
 	}
+
+	log.Debug().Msgf("isNewConversation: %v", isNewConversation)
+	log.Debug().Msgf("cacheItem: %+v", cacheItem)
 
 	markdownContent := "Aspernatur ut est delectus molestias consequatur quo explicabo nesciunt impedit aut. Doloremque nesciunt fuga exercitationem architecto ut rerum porro soluta ducimus. Unde in eveniet aut magni qui assumenda laborum iusto hic consequatur ad debitis nostrum labore. Deserunt quaerat iusto neque sit labore totam similique corporis magni corrupti. Consequatur et omnis ducimus expedita beatae explicabo blanditiis voluptatem eius aliquam veritatis nulla autem id quia. Et eligendi sunt sit nesciunt architecto quas molestiae excepturi dolorem enim id et dolor cum. Cum consequatur quo nemo ut et ex et non et. Placeat cum esse ut eaque debitis quo quas non molestias accusantium fugit temporibus ut at sequi. Ipsum similique molestiae voluptas mollitia voluptates perferendis deserunt."
 
@@ -116,21 +120,41 @@ func storeUserEntry(ctx context.Context, s *SlackRoute) error {
 	return err
 }
 
-// getConversationID retrieves the conversation ID from the cache.
-func getConversationID(ctx context.Context, s *SlackRoute) (string, error) {
+// getUserCache retrieves the entire cache item from the cache.
+// If the cache item is not found, it returns false and a nil cache item.
+// If an error occurs, it returns false and the error.
+func getUserCache(ctx context.Context, s *SlackRoute) (bool, *internal.CacheItem, error) {
 	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.SlackEvent.UserID, s.SlackEvent.ChannelID)
 
-	conversationID, err := s.cache.HGet(ctx, primaryKey, "ConversationID").Result()
+	result, err := s.cache.HGetAll(ctx, primaryKey).Result()
 	if err != nil {
 		if err == redis.Nil {
-			log.Debug().Msgf("Conversation ID not found in cache: %s", primaryKey)
-			return "", nil
+			log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
+			return false, nil, nil
 		}
-		log.Error().Err(err).Msg("Error retrieving conversation ID from cache.")
-		return "", err
+		log.Error().Err(err).Msg("Error retrieving user cache from cache.")
+		return false, nil, err
 	}
 
-	log.Debug().Msgf("Retrieved conversation ID from cache: %s", conversationID)
+	if len(result) == 0 {
+		log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
+		return false, nil, nil
+	}
 
-	return conversationID, nil
+	cacheItem := &internal.CacheItem{
+		UserID:         result["UserID"],
+		ChannelID:      result["ChannelID"],
+		ConversationID: result["ConversationID"],
+	}
+
+	if timestamp, ok := result["Timestamp"]; ok {
+		if t, err := strconv.ParseInt(timestamp, 10, 64); err == nil {
+			tNow := time.Unix(t, 0)
+			cacheItem.Timestamp = &tNow
+		}
+	}
+
+	log.Debug().Msgf("Retrieved user cache from cache: %v", cacheItem)
+
+	return true, cacheItem, nil
 }
