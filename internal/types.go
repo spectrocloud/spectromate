@@ -1,5 +1,7 @@
 package internal
 
+import "time"
+
 type MendableResponse struct {
 	Chunk    string             `json:"chunk"`
 	Metadata []MendableMetadata `json:"metadata"`
@@ -41,4 +43,11 @@ type SlackBlock struct {
 type SlackTextObject struct {
 	Type string `json:"type"`
 	Text string `json:"text"`
+}
+
+type CacheItem struct {
+	UserID         string
+	ChannelID      string
+	ConversationID string
+	Timestamp      *time.Time
 }

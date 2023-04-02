@@ -2,30 +2,27 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
-
-	_ "github.com/lib/pq"
 
 	_ "go.uber.org/automaxprocs"
 	"spectrocloud.com/docs-slack-bot/commands"
 	"spectrocloud.com/docs-slack-bot/internal"
 )
 
-const (
-	db_driver string = "postgres"
-)
-
 var (
-	// dbName              string
-	// dbUser              string
-	// dbPassword          string
-	// dbHost              string
-	// dbPort              int64
-	globalTraceLevel string
-	// globalDb            *sqlx.DB
+	globalRedisPort     int64
+	globalRedisURL      string
+	globalRedisClient   *redis.Client
+	globalRedisPassword string
+	globalRedisUser     string
+	globalRedisTLS      bool
+	globalTraceLevel    string
 	globalHost          string
 	globalPort          string
 	globalHostURL       string = globalHost + ":" + globalPort
@@ -36,63 +33,52 @@ func init() {
 	globalTraceLevel = strings.ToUpper(internal.Getenv("TRACE", "INFO"))
 	internal.InitLogger(globalTraceLevel)
 	globalSigningSecret = internal.Getenv("SLACK_SIGNING_SECRET", "")
-	// initDB := strings.ToLower(internal.Getenv("DB_INIT", "false"))
 	port := internal.Getenv("PORT", "3000")
 	host := internal.Getenv("HOST", "0.0.0.0")
 	globalHost = host
 	globalPort = port
 	globalHostURL = host + ":" + port
-	// dbName = internal.Getenv("DB_NAME", "counter")
-	// dbUser = internal.Getenv("DB_USER", "postgres")
-	// dbHost = internal.Getenv("DB_HOST", "0.0.0.0")
-	// dbEncryption := internal.Getenv("DB_ENCRYPTION", "disable")
-	// dbPassword = internal.Getenv("DB_PASSWORD", "password")
-	// dbPort = internal.StringToInt64(internal.Getenv("DB_PORT", "5432"))
-	// db, err := sqlx.Open(db_driver, fmt.Sprintf(
-	// 	"host=%s port=%d dbname=%s user=%s password=%s connect_timeout=5 sslmode=%s",
-	// 	dbHost,
-	// 	dbPort,
-	// 	dbName,
-	// 	dbUser,
-	// 	dbPassword,
-	// 	dbEncryption,
-	// ))
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("Error connecting to database")
-	// }
+	globalRedisPort = internal.StringToInt64(internal.Getenv("REDIS_PORT", "6379"))
+	globalRedisURL = internal.Getenv("REDIS_URL", "localhost")
+	globalRedisPassword = internal.Getenv("REDIS_PASSWORD", "")
+	globalRedisUser = internal.Getenv("REDIS_USER", "")
+	reditConnectionString := fmt.Sprintf("%s:%d", globalRedisURL, globalRedisPort)
 
-	// db.SetConnMaxIdleTime(45 * time.Second)
-	// db.SetMaxIdleConns(3)
-	// db.SetConnMaxLifetime(1 * time.Minute)
+	var tlsConfig *tls.Config
 
-	// log.Debug().Msg("Checking database connection...")
-	// err = db.Ping()
-	// if err != nil {
-	// 	log.Debug().Msg("Database is not available")
-	// 	log.Fatal().Err(err).Msg("Error connecting to database")
-	// }
+	if globalRedisTLS {
+		tlsConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
+	}
 
-	// if initDB == "true" {
-	// 	log.Debug().Msg("Initializing database")
-	// 	err = internal.InitDB(context.Background(), db)
-	// 	if err != nil {
-	// 		log.Fatal().Err(err).Msg("Error initializing database")
-	// 	}
-	// }
-
-	// globalDb = db
+	rdb := redis.NewClient(&redis.Options{
+		Addr:      reditConnectionString,
+		Password:  globalRedisPassword,
+		DB:        0,
+		Username:  globalRedisUser,
+		TLSConfig: tlsConfig,
+	})
+	log.Debug().Msg("Checking database connection...")
+	_, err := rdb.Ping(context.Background()).Result()
+	if err != nil {
+		log.Debug().Msg("Redis is not available")
+		log.Fatal().Err(err).Msg("Error connecting to redis")
+	}
+	globalRedisClient = rdb
 }
 
 func main() {
 	ctx := context.Background()
+	rdb := globalRedisClient
 	healthRoute := commands.NewHealthHandlerContext(ctx)
-	helpRoute := commands.NewHelpHandlerContext(ctx, globalSigningSecret)
+	slackRoute := commands.NewHelpHandlerContext(ctx, globalSigningSecret, rdb)
 
-	http.HandleFunc(internal.ApiPrefix+"health", healthRoute.HealthHTTPHandler)
-	http.HandleFunc(internal.ApiPrefix+"help", helpRoute.HelpHTTPHandler)
+	http.HandleFunc(internal.ApiPrefixV1+"health", healthRoute.HealthHTTPHandler)
+	http.HandleFunc(internal.ApiPrefixV1+"slack", slackRoute.SlackHTTPHandler)
 
 	log.Info().Msgf("Server is configured for port %s and listing on %s", globalPort, globalHostURL)
-	// log.Info().Msgf("Database is configured for %s:%d", dbHost, dbPort)
+	log.Info().Msgf("Redis is configured for %s:%d", globalRedisURL, globalRedisPort)
 	log.Info().Msgf("Trace level set to: %s", globalTraceLevel)
 	// log.Info().Msgf("Authorization is set to: %v", globalAuthorization)
 	log.Info().Msg("Starting server...")

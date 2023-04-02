@@ -6,7 +6,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -58,43 +57,6 @@ func validateSignature(ctx context.Context, signature, signingSecret, slackSigni
 	//hex encode the SHA256
 	calculatedSignature := fmt.Sprintf("v0=%s", hex.EncodeToString(mac.Sum(nil)))
 	return hmac.Equal([]byte(signature), []byte(calculatedSignature))
-}
-
-// // createMarkdownPayload creates a Slack payload with a markdown block
-func CreateMarkdownPayload(content, title string) ([]byte, error) {
-	log.Info().Msgf("Incoming Message: %v", content)
-
-	payload := SlackPayload{
-		ReponseType: "in_channel",
-		Blocks: []SlackBlock{
-			{
-				Type: "header",
-				Text: &SlackTextObject{
-					Type: "plain_text",
-					Text: title,
-				},
-			},
-			{
-				Type: "divider",
-			},
-			{
-				Type: "section",
-				Text: &SlackTextObject{
-					Type: "mrkdwn",
-					Text: content,
-				},
-			},
-		},
-	}
-
-	log.Debug().Msgf("Blocks: %v", payload)
-
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return payloadBytes, nil
 }
 
 // DecodeForm decodes the form data into the struct.
