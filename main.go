@@ -16,23 +16,25 @@ import (
 )
 
 var (
-	globalRedisPort     int64
-	globalRedisURL      string
-	globalRedisClient   *redis.Client
-	globalRedisPassword string
-	globalRedisUser     string
-	globalRedisTLS      bool
-	globalTraceLevel    string
-	globalHost          string
-	globalPort          string
-	globalHostURL       string = globalHost + ":" + globalPort
-	globalSigningSecret string
+	globalRedisPort      int64
+	globalRedisURL       string
+	globalRedisClient    *redis.Client
+	globalRedisPassword  string
+	globalRedisUser      string
+	globalRedisTLS       bool
+	globalTraceLevel     string
+	globalHost           string
+	globalPort           string
+	globalHostURL        string = globalHost + ":" + globalPort
+	globalSigningSecret  string
+	globalMendableAPIKey string
 )
 
 func init() {
 	globalTraceLevel = strings.ToUpper(internal.Getenv("TRACE", "INFO"))
 	internal.InitLogger(globalTraceLevel)
 	globalSigningSecret = internal.Getenv("SLACK_SIGNING_SECRET", "")
+	globalMendableAPIKey = internal.Getenv("MENDABLE_API_KEY", "")
 	port := internal.Getenv("PORT", "3000")
 	host := internal.Getenv("HOST", "0.0.0.0")
 	globalHost = host
@@ -72,7 +74,7 @@ func main() {
 	ctx := context.Background()
 	rdb := globalRedisClient
 	healthRoute := commands.NewHealthHandlerContext(ctx)
-	slackRoute := commands.NewHelpHandlerContext(ctx, globalSigningSecret, rdb)
+	slackRoute := commands.NewHelpHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, rdb)
 
 	http.HandleFunc(internal.ApiPrefixV1+"health", healthRoute.HealthHTTPHandler)
 	http.HandleFunc(internal.ApiPrefixV1+"slack", slackRoute.SlackHTTPHandler)

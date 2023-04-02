@@ -20,6 +20,8 @@ import (
 // Set the private bool to true to ask a question privately.
 func AskCmd(s *SlackRoute, private bool) ([]byte, error) {
 
+	var conversationId int64
+
 	// Check if a conversation already exists for this user.
 	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
@@ -27,12 +29,23 @@ func AskCmd(s *SlackRoute, private bool) ([]byte, error) {
 		return nil, err
 	}
 
-	log.Debug().Msgf("isNewConversation: %v", isNewConversation)
-	log.Debug().Msgf("cacheItem: %+v", cacheItem)
+	switch isNewConversation {
+	case true:
+		// Create a new conversation.
+		log.Debug().Msgf("Creating a new conversation for user: %v", s.SlackEvent.UserID)
+		id, err := internal.CreateNewConversation(s.mendableApiKey, internal.MendandableNewConversationURL)
+		if err != nil {
+			log.Debug().Err(err).Msgf("Error creating new conversation: %+v", s.SlackEvent)
+			return nil, err
+		}
+		conversationId = id
+	default:
+		// Use the existing conversation.
+	}
 
 	markdownContent := "Aspernatur ut est delectus molestias consequatur quo explicabo nesciunt impedit aut. Doloremque nesciunt fuga exercitationem architecto ut rerum porro soluta ducimus. Unde in eveniet aut magni qui assumenda laborum iusto hic consequatur ad debitis nostrum labore. Deserunt quaerat iusto neque sit labore totam similique corporis magni corrupti. Consequatur et omnis ducimus expedita beatae explicabo blanditiis voluptatem eius aliquam veritatis nulla autem id quia. Et eligendi sunt sit nesciunt architecto quas molestiae excepturi dolorem enim id et dolor cum. Cum consequatur quo nemo ut et ex et non et. Placeat cum esse ut eaque debitis quo quas non molestias accusantium fugit temporibus ut at sequi. Ipsum similique molestiae voluptas mollitia voluptates perferendis deserunt."
 
-	err = storeUserEntry(s.ctx, s)
+	err = storeUserEntry(s.ctx, s, conversationId)
 	if err != nil {
 		log.Debug().Err(err).Msgf("Error storing user entry: %+v", s.SlackEvent)
 		return nil, err
@@ -91,7 +104,7 @@ func askMarkdownPayload(content, title string) ([]byte, error) {
 // - Channel ID
 // - Conversation ID
 // - Timestamp
-func storeUserEntry(ctx context.Context, s *SlackRoute) error {
+func storeUserEntry(ctx context.Context, s *SlackRoute, conversationId int64) error {
 
 	tNow := time.Now()
 
@@ -100,7 +113,7 @@ func storeUserEntry(ctx context.Context, s *SlackRoute) error {
 	cacheItem := map[string]interface{}{
 		"UserID":         s.SlackEvent.UserID,
 		"ChannelID":      s.SlackEvent.ChannelID,
-		"ConversationID": "",
+		"ConversationID": conversationId,
 		"Timestamp":      &tNow,
 	}
 

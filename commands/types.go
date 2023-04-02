@@ -13,10 +13,11 @@ type HealthRoute struct {
 }
 
 type SlackRoute struct {
-	ctx           context.Context
-	signingSecret string
-	SlackEvent    *internal.SlackEvent
-	cache         *redis.Client
+	ctx            context.Context
+	signingSecret  string
+	mendableApiKey string
+	SlackEvent     *internal.SlackEvent
+	cache          *redis.Client
 }
 
 type SlackCommands int

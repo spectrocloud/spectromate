@@ -51,3 +51,7 @@ type CacheItem struct {
 	ConversationID string
 	Timestamp      *time.Time
 }
+
+type MendableNewConversationResponse struct {
+	ConversationID int64 `json:"conversation_id"`
+}

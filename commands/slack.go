@@ -11,8 +11,8 @@ import (
 )
 
 // NewHandlerContext returns a new CounterRoute with a database connection.
-func NewHelpHandlerContext(ctx context.Context, signingSecret string, r *redis.Client) *SlackRoute {
-	return &SlackRoute{ctx, signingSecret, &internal.SlackEvent{}, r}
+func NewHelpHandlerContext(ctx context.Context, signingSecret, mendableApiKey string, r *redis.Client) *SlackRoute {
+	return &SlackRoute{ctx, signingSecret, mendableApiKey, &internal.SlackEvent{}, r}
 }
 
 func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *http.Request) {
@@ -32,6 +32,7 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 		log.Fatal().Err(err).Msg("Error getting slack event.")
 	}
 
+	// Set the slack event in the SlackRoute struct so it can be used by the other handlers.
 	slack.SlackEvent = &event
 
 	log.Debug().Msgf("User: %+v", event.UserName)
