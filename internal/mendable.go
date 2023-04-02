@@ -30,7 +30,7 @@ func CreateNewConversation(apiKey, apiURL string) (int64, error) {
 	req.Header.Set("api_key", apiKey)
 
 	client := &http.Client{
-		Timeout: 10 * 5 * time.Second,
+		Timeout: 10 * time.Second,
 	}
 
 	resp, err := client.Do(req)

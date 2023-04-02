@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"runtime"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -43,5 +45,18 @@ func PanicErr(err error) {
 func PanicOkErr(ok bool, err error) {
 	if err != nil || !ok {
 		log.Fatal().Send()
+	}
+}
+
+func LogError(err error) {
+	pc, file, line, ok := runtime.Caller(1)
+	if ok {
+		log.Err(err).
+			Str("file", file).
+			Int("line", line).
+			Str("function", runtime.FuncForPC(pc).Name()).
+			Send()
+	} else {
+		log.Err(err).Send()
 	}
 }

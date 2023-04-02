@@ -22,6 +22,9 @@ func AskCmd(s *SlackRoute, private bool) ([]byte, error) {
 
 	var conversationId int64
 
+	// sleep for 5 seconds to simulate a long running process.
+	time.Sleep(5 * time.Second)
+
 	// Check if a conversation already exists for this user.
 	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
@@ -42,6 +45,8 @@ func AskCmd(s *SlackRoute, private bool) ([]byte, error) {
 	default:
 		// Use the existing conversation.
 	}
+
+	log.Debug().Msgf("ChacheItem: %v", cacheItem)
 
 	markdownContent := "Aspernatur ut est delectus molestias consequatur quo explicabo nesciunt impedit aut. Doloremque nesciunt fuga exercitationem architecto ut rerum porro soluta ducimus. Unde in eveniet aut magni qui assumenda laborum iusto hic consequatur ad debitis nostrum labore. Deserunt quaerat iusto neque sit labore totam similique corporis magni corrupti. Consequatur et omnis ducimus expedita beatae explicabo blanditiis voluptatem eius aliquam veritatis nulla autem id quia. Et eligendi sunt sit nesciunt architecto quas molestiae excepturi dolorem enim id et dolor cum. Cum consequatur quo nemo ut et ex et non et. Placeat cum esse ut eaque debitis quo quas non molestias accusantium fugit temporibus ut at sequi. Ipsum similique molestiae voluptas mollitia voluptates perferendis deserunt."
 

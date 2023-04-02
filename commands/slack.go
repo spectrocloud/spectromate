@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -40,21 +41,24 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 	log.Debug().Msgf("Channel: %+v", event.ChannelName)
 	log.Debug().Msgf("ChannelId: %+v", event.ChannelID)
 	log.Debug().Msgf("Text: %+v", event.Text)
+	log.Debug().Msgf("ResponseUrl: %+v", event.ResponseURL)
 
-	value, err := slack.getHandler(request)
+	value, err := slack.getHandler(writer, request)
 	if err != nil {
-		log.Debug().Msg("Error reply to help request.")
-		http.Error(writer, "Error getting reply to help request.", http.StatusInternalServerError)
+		internal.LogError(err)
+		log.Debug().Msg("an error occurred in the Slack getHandler.")
 	}
+
 	writer.WriteHeader(http.StatusOK)
 	_, err = writer.Write([]byte(value))
 	if err != nil {
+		internal.LogError(err)
 		log.Error().Err(err).Msg("Error writing response to the help endpoint.")
 	}
 }
 
 // getHandler returns a health check response.
-func (slack *SlackRoute) getHandler(r *http.Request) ([]byte, error) {
+func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request) ([]byte, error) {
 
 	var returnPayload []byte
 
@@ -70,11 +74,17 @@ func (slack *SlackRoute) getHandler(r *http.Request) ([]byte, error) {
 	case Help:
 		returnPayload, err = HelpCmd()
 		if err != nil {
+			internal.LogError(err)
 			log.Info().Err(err).Msg(internal.SlackDefaultUserErrorMessage)
 			return nil, err
 		}
 	case Ask:
-		returnPayload, err = AskCmd(slack, false)
+		err := replyStatus200(slack.SlackEvent.ResponseURL, writer)
+		if err != nil {
+			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
+			return nil, err
+		}
+		go AskCmd(slack, false)
 		if err != nil {
 			log.Info().Err(err).Msg(internal.SlackDefaultUserErrorMessage)
 			return nil, err
@@ -102,9 +112,64 @@ func determineCommnad(input string) (SlackCommands, error) {
 
 	cmd, err := SlackCommandsFromString(input)
 	if err != nil {
+		internal.LogError(err)
 		log.Info().Err(err).Msg("Error converting string to SlackCommands type.")
 		return cmd, err
 	}
 
 	return cmd, nil
+}
+
+// replyStatus200 replies to the Slack event with a 200 status.
+// This is required to prevent Slack from considering the request a failure.
+// Slack requires a response within 3 seconds.
+func replyStatus200(reponseURL string, writer http.ResponseWriter) error {
+
+	markdownContent := "Hang tight while I review the docs..."
+
+	_, err := waitMarkdownPayload("Docs Answer", markdownContent)
+	if err != nil {
+		internal.LogError(err)
+		log.Error().Err(err).Msg("Error creating Slack 200 markdown payload.")
+	}
+
+	writer.WriteHeader(http.StatusOK)
+	_, err = writer.Write([]byte(markdownContent))
+	if err != nil {
+		internal.LogError(err)
+		log.Error().Err(err).Msg("Error writing 200 OK Wait Reply.")
+	}
+
+	log.Debug().Msg("Successfully replied to Slack with status 200.")
+	return nil
+}
+
+func waitMarkdownPayload(title, content string) ([]byte, error) {
+
+	payload := internal.SlackPayload{
+		ReponseType: "in_channel",
+		Blocks: []internal.SlackBlock{
+			{
+				Type: "header",
+				Text: &internal.SlackTextObject{
+					Type: "plain_text",
+					Text: title,
+				},
+			},
+			{
+				Type: "section",
+				Text: &internal.SlackTextObject{
+					Type: "mrkdwn",
+					Text: content,
+				},
+			},
+		},
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return payloadBytes, nil
 }
