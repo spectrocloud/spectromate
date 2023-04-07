@@ -90,6 +90,11 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			return nil, err
 		}
 	case PAsk:
+		err := replyStatus200(slack.SlackEvent.ResponseURL, writer)
+		if err != nil {
+			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
+			return nil, err
+		}
 		returnPayload, err = AskCmd(slack, true)
 		if err != nil {
 			log.Info().Err(err).Msg(internal.SlackDefaultUserErrorMessage)

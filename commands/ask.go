@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -21,6 +22,10 @@ import (
 func AskCmd(s *SlackRoute, private bool) ([]byte, error) {
 
 	var conversationId int64
+
+	// Get the user's question.
+	userQuery := strings.Split(strings.Join(strings.Split(s.SlackEvent.Text, " ")[1:], " "), "?")
+	log.Debug().Msgf("User query: %v", userQuery)
 
 	// sleep for 5 seconds to simulate a long running process.
 	time.Sleep(5 * time.Second)

@@ -2,15 +2,41 @@ package internal
 
 import "time"
 
+type Response struct {
+	Chunk          string `json:"chunk,omitempty"`
+	Metadata       MendableMetadata
+	FullDocs       bool   `json:"full_docs,omitempty"`
+	AlertMessage   string `json:"alert_message,omitempty"`
+	FullDocsSource string `json:"full_docs_source,omitempty"`
+}
+
 type MendableResponse struct {
 	Chunk    string             `json:"chunk"`
 	Metadata []MendableMetadata `json:"metadata"`
 }
 
 type MendableMetadata struct {
-	ID      string `json:"id"`
-	Content string `json:"content"`
-	Link    string `json:"link"`
+	ID      string    `json:"id"`
+	Content string    `json:"content"`
+	Score   float64   `json:"score"`
+	Date    time.Time `json:"date"`
+	Link    string    `json:"link"`
+}
+
+type MendableAPIRequest struct {
+	ApiKey string `json:"api_key"`
+}
+
+type HistoryItems struct {
+	Prompt   string `json:"prompt"`
+	Response string `json:"response"`
+}
+
+type MendableQueryPayload struct {
+	ApiKey         string         `json:"api_key"`
+	Question       string         `json:"question,omitempty"`
+	History        []HistoryItems `json:"history,omitempty"`
+	ConversationID int            `json:"conversation_id,omitempty"`
 }
 
 type SlackEvent struct {
