@@ -52,6 +52,8 @@ func CreateNewConversation(ctx context.Context, apiKey, apiURL string) (int64, e
 		return -1, err
 	}
 
+	log.Debug().Msgf("Conversation ID: %d", responseBody.ConversationID)
+
 	return responseBody.ConversationID, nil
 }
 

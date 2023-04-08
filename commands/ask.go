@@ -114,7 +114,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 	log.Debug().Msgf("ChacheItem: %v", cacheItem)
 
 	linksString := linksBuilderString(mendableResponse.Links)
-	markdownContent := fmt.Sprintf("*Answer* \n\n %v", userQuery)
+	markdownContent := fmt.Sprintf("%v", mendableResponse.Answer)
 
 	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter)
 	if err != nil {
@@ -239,7 +239,7 @@ func getUserCache(ctx context.Context, s *SlackRoute) (bool, *internal.CacheItem
 	if err != nil {
 		if err == redis.Nil {
 			log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
-			return false, nil, nil
+			return true, nil, nil
 		}
 		log.Error().Err(err).Msg("Error retrieving user cache from cache.")
 		return false, nil, err
@@ -247,7 +247,7 @@ func getUserCache(ctx context.Context, s *SlackRoute) (bool, *internal.CacheItem
 
 	if len(result) == 0 {
 		log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
-		return false, nil, nil
+		return true, nil, nil
 	}
 
 	cacheItem := &internal.CacheItem{
@@ -268,7 +268,7 @@ func getUserCache(ctx context.Context, s *SlackRoute) (bool, *internal.CacheItem
 
 	log.Debug().Msgf("Retrieved user cache from cache: %v", cacheItem)
 
-	return true, cacheItem, nil
+	return false, cacheItem, nil
 }
 
 // linksBuilderString builds a string of links.
