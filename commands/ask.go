@@ -26,10 +26,14 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 		mendableResponse internal.MendableQueryResponse
 		requestCounter   int
 	)
+	log.Debug().Msgf("The message is private: %v", isPrivate)
+	// This will get the user's question.
+	// Split the string on spaces
+	words := strings.Split(s.SlackEvent.Text, " ")[1:]
+	lastWord := words[len(words)-1]
+	userQuery := strings.Join(words[:len(words)-1], " ") + " " + strings.TrimRight(lastWord, "\r\n")
 
-	// Get the user's question.
-	text := strings.Split(strings.Join(strings.Split(s.SlackEvent.Text, " ")[1:], " "), "?")
-	userQuery := strings.Join(text, " ")
+	// Log the user query
 	log.Debug().Msgf("User query: %v", userQuery)
 
 	// Check if a conversation already exists for this user.
@@ -48,6 +52,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 			log.Debug().Err(err).Msgf("Error creating new conversation: %+v", s.SlackEvent)
 			return
 		}
+
 		conversationId = id
 		questionRequestItem := internal.MendableRequestPayload{
 			ApiKey:         s.mendableApiKey,
@@ -63,6 +68,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 			internal.LogError(err)
 			return
 		}
+
 		// Set the question counter to 1.
 		requestCounter = 1
 
@@ -114,7 +120,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 	log.Debug().Msgf("ChacheItem: %v", cacheItem)
 
 	linksString := linksBuilderString(mendableResponse.Links)
-	markdownContent := fmt.Sprintf("%v", mendableResponse.Answer)
+	markdownContent := fmt.Sprintf(`%v`, mendableResponse.Answer)
 
 	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter)
 	if err != nil {
@@ -148,7 +154,7 @@ func askMarkdownPayload(content, links, title string, isPrivate bool) ([]byte, e
 	}
 
 	payload := internal.SlackPayload{
-		ReponseType: responseType,
+		ResponseType: responseType,
 		Blocks: []internal.SlackBlock{
 			{
 				Type: "header",

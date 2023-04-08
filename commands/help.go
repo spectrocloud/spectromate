@@ -25,7 +25,7 @@ func helpMarkdownPayload(content, title string) ([]byte, error) {
 	log.Info().Msgf("Incoming Message: %v", content)
 
 	payload := internal.SlackPayload{
-		ReponseType: "ephemeral",
+		ResponseType: "ephemeral",
 		Blocks: []internal.SlackBlock{
 			{
 				Type: "header",

@@ -1,10 +1,8 @@
 package internal
 
 import (
-	"errors"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -24,28 +22,4 @@ func StringToInt64(s string) int64 {
 		log.Fatal().Err(err).Msgf("Error converting %s string to int64", s)
 	}
 	return i
-}
-
-// CheckRequiredEnvVars checks that the required environment variables are set.
-func CheckRequiredEnvVars(envVars map[string]string) error {
-	var missingVars []string
-
-	for name, defaultValue := range envVars {
-		value, exists := os.LookupEnv(name)
-		if !exists || strings.TrimSpace(value) == "" {
-			missingVars = append(missingVars, name)
-		} else {
-			envVars[name] = value
-		}
-		if defaultValue != "" && !exists {
-			os.Setenv(name, defaultValue)
-		}
-	}
-
-	if len(missingVars) > 0 {
-		errorMessage := "Missing required environment variables: " + strings.Join(missingVars, ", ")
-		return errors.New(errorMessage)
-	}
-
-	return nil
 }

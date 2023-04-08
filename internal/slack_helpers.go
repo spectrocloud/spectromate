@@ -106,17 +106,25 @@ func GetSlackEvent(request *http.Request) (SlackEvent, error) {
 // replyStatus200 replies to the Slack event with a 200 status.
 // This is required to prevent Slack from considering the request a failure.
 // Slack requires a response within 3 seconds.
-func ReplyStatus200(reponseURL string, writer http.ResponseWriter, isPrivate bool) error {
+func ReplyStatus200(responseURL string, writer http.ResponseWriter, isPrivate bool) error {
+
+	if responseURL == "" {
+		err := errors.New("response URL is empty")
+		log.Debug().Err(err).Msg("error encountered while sending the Slack 200 OK reply back HTTP request")
+		LogError(err)
+		return err
+	}
 
 	markdownContent := GetRandomWaitMessage()
-	_, err := genericMarkdownPayload("Docs Answer", markdownContent, isPrivate)
+	returnValue, err := genericMarkdownPayload("Docs Answer", markdownContent, isPrivate)
 	if err != nil {
 		LogError(err)
 		log.Error().Err(err).Msg("Error creating Slack 200 markdown payload.")
 	}
 
+	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
-	_, err = writer.Write([]byte(markdownContent))
+	_, err = writer.Write(returnValue)
 	if err != nil {
 		LogError(err)
 		log.Error().Err(err).Msg("Error writing 200 OK Wait Reply.")
@@ -127,19 +135,28 @@ func ReplyStatus200(reponseURL string, writer http.ResponseWriter, isPrivate boo
 }
 
 // replyWithAnswer replies to the Slack event using the response URL provided.
-func ReplyWithAnswer(reponseURL string, payload []byte, isPrivate bool) error {
+func ReplyWithAnswer(responseURL string, payload []byte, isPrivate bool) error {
 
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", reponseURL, bytes.NewBuffer(payload))
-
-	if err != nil {
-		log.Debug().Err(err).Msg("error creating the reply back HTTP request")
+	if responseURL == "" {
+		err := errors.New("response URL is empty")
+		log.Debug().Err(err).Msg("error encountered while sending the Slack 200 OK reply back HTTP request")
+		LogError(err)
 		return err
 	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", responseURL, bytes.NewBuffer(payload))
+	if err != nil {
+		log.Debug().Err(err).Msg("error creating the reply back HTTP request")
+		LogError(err)
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
 		log.Debug().Err(err).Msg("error encountered while sending the Slack anser reply back HTTP request")
+		LogError(err)
 		return err
 	}
 	defer res.Body.Close()
@@ -152,15 +169,15 @@ func ReplyWithAnswer(reponseURL string, payload []byte, isPrivate bool) error {
 
 func genericMarkdownPayload(title, content string, isPrivate bool) ([]byte, error) {
 
-	var reponseType string
+	var ResponseType string
 	if isPrivate {
-		reponseType = "ephemeral"
+		ResponseType = "ephemeral"
 	} else {
-		reponseType = "in_channel"
+		ResponseType = "in_channel"
 	}
 
 	payload := SlackPayload{
-		ReponseType: reponseType,
+		ResponseType: ResponseType,
 		Blocks: []SlackBlock{
 			{
 				Type: "header",
@@ -181,8 +198,12 @@ func genericMarkdownPayload(title, content string, isPrivate bool) ([]byte, erro
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
+		log.Debug().Err(err).Msg("error marshalling the Slack payload")
+		LogError(err)
 		return []byte{}, err
 	}
+
+	log.Debug().Msgf("Slack Reply Payload: ", string(payloadBytes))
 
 	return payloadBytes, nil
 }

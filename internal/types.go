@@ -66,8 +66,9 @@ type SlackEvent struct {
 }
 
 type SlackPayload struct {
-	ReponseType string       `json:"response_type,omitempty"`
-	Blocks      []SlackBlock `json:"blocks"`
+	ResponseType    string       `json:"response_type,omitempty"`
+	ReplaceOriginal bool         `json:"replace_original,omitempty"`
+	Blocks          []SlackBlock `json:"blocks"`
 }
 
 type SlackBlock struct {

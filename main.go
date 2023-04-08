@@ -46,13 +46,12 @@ func init() {
 	globalRedisUser = internal.Getenv("REDIS_USER", "")
 	reditConnectionString := fmt.Sprintf("%s:%d", globalRedisURL, globalRedisPort)
 
-	switch {
-	case globalSigningSecret == "":
+	if globalSigningSecret == "" {
 		log.Fatal().Msg("The required environment variable SLACK_SIGNING_SECRET is not set. Exiting...")
-	case globalMendableAPIKey == "":
+	}
+
+	if globalMendableAPIKey == "" {
 		log.Fatal().Msg("The required environment variable MENDABLE_API_KEY is not set. Exiting...")
-	default:
-		log.Debug().Msg("All required environment variables are set")
 	}
 
 	var tlsConfig *tls.Config

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -62,6 +62,8 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 
 	var mendableResponse MendableQueryResponse
 
+	log.Debug().Msgf("Query Question: %s", query.Question)
+
 	payload := MendableRequestPayload{
 		ApiKey:         query.ApiKey,
 		Question:       query.Question,
@@ -77,7 +79,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 	}
 
 	client := &http.Client{
-		Timeout: 15 * time.Second,
+		Timeout: 20 * time.Second,
 	}
 
 	request, err := http.NewRequest("POST", queryURL, bytes.NewBuffer(jsonData))
@@ -96,7 +98,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 	}
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Debug().Err(err).Msg("Error while reading response body:")
 		LogError(err)
@@ -114,10 +116,13 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 	uniqueLinks := retrieveUniqueLinks(&result.Sources)
 
 	mendableResponse = MendableQueryResponse{
-		Question: query.Question,
-		Answer:   result.Answer.Text,
-		Links:    uniqueLinks,
+		ConversationID: int64(query.ConversationID),
+		Question:       query.Question,
+		Answer:         result.Answer.Text,
+		Links:          uniqueLinks,
 	}
+
+	log.Debug().Msgf("Mendable Question response: %v", mendableResponse)
 
 	return mendableResponse, nil
 
