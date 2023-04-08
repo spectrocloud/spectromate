@@ -6,6 +6,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -100,4 +101,88 @@ func GetSlackEvent(request *http.Request) (SlackEvent, error) {
 	}
 
 	return event, nil
+}
+
+// replyStatus200 replies to the Slack event with a 200 status.
+// This is required to prevent Slack from considering the request a failure.
+// Slack requires a response within 3 seconds.
+func ReplyStatus200(reponseURL string, writer http.ResponseWriter, isPrivate bool) error {
+
+	markdownContent := GetRandomWaitMessage()
+	_, err := genericMarkdownPayload("Docs Answer", markdownContent, isPrivate)
+	if err != nil {
+		LogError(err)
+		log.Error().Err(err).Msg("Error creating Slack 200 markdown payload.")
+	}
+
+	writer.WriteHeader(http.StatusOK)
+	_, err = writer.Write([]byte(markdownContent))
+	if err != nil {
+		LogError(err)
+		log.Error().Err(err).Msg("Error writing 200 OK Wait Reply.")
+	}
+
+	log.Debug().Msg("Successfully replied to Slack with status 200.")
+	return nil
+}
+
+// replyWithAnswer replies to the Slack event using the response URL provided.
+func ReplyWithAnswer(reponseURL string, payload []byte, isPrivate bool) error {
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", reponseURL, bytes.NewBuffer(payload))
+
+	if err != nil {
+		log.Debug().Err(err).Msg("error creating the reply back HTTP request")
+		return err
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Debug().Err(err).Msg("error encountered while sending the Slack anser reply back HTTP request")
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode >= 400 {
+		return fmt.Errorf("request failed with status code: %d", res.StatusCode)
+	}
+
+	return nil
+}
+
+func genericMarkdownPayload(title, content string, isPrivate bool) ([]byte, error) {
+
+	var reponseType string
+	if isPrivate {
+		reponseType = "ephemeral"
+	} else {
+		reponseType = "in_channel"
+	}
+
+	payload := SlackPayload{
+		ReponseType: reponseType,
+		Blocks: []SlackBlock{
+			{
+				Type: "header",
+				Text: &SlackTextObject{
+					Type: "plain_text",
+					Text: title,
+				},
+			},
+			{
+				Type: "section",
+				Text: &SlackTextObject{
+					Type: "mrkdwn",
+					Text: content,
+				},
+			},
+		},
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return payloadBytes, nil
 }

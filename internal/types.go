@@ -2,29 +2,19 @@ package internal
 
 import "time"
 
-type Response struct {
-	Chunk          string `json:"chunk,omitempty"`
-	Metadata       MendableMetadata
-	FullDocs       bool   `json:"full_docs,omitempty"`
-	AlertMessage   string `json:"alert_message,omitempty"`
-	FullDocsSource string `json:"full_docs_source,omitempty"`
-}
-
-type MendableResponse struct {
-	Chunk    string             `json:"chunk"`
-	Metadata []MendableMetadata `json:"metadata"`
-}
-
-type MendableMetadata struct {
-	ID      string    `json:"id"`
-	Content string    `json:"content"`
-	Score   float64   `json:"score"`
-	Date    time.Time `json:"date"`
-	Link    string    `json:"link"`
-}
-
+/*
+ * Mendable API types
+ */
 type MendableAPIRequest struct {
 	ApiKey string `json:"api_key"`
+}
+
+type MendableRequestPayload struct {
+	ApiKey         string         `json:"api_key"`
+	Question       string         `json:"question"`
+	History        []HistoryItems `json:"history"`
+	ShouldStream   bool           `json:"shouldStream"`
+	ConversationID int64          `json:"conversation_id"`
 }
 
 type HistoryItems struct {
@@ -32,12 +22,32 @@ type HistoryItems struct {
 	Response string `json:"response"`
 }
 
-type MendableQueryPayload struct {
-	ApiKey         string         `json:"api_key"`
-	Question       string         `json:"question,omitempty"`
-	History        []HistoryItems `json:"history,omitempty"`
-	ConversationID int            `json:"conversation_id,omitempty"`
+type MendablePayload struct {
+	Answer struct {
+		Text string `json:"text"`
+	} `json:"answer"`
+	MessageID int               `json:"message_id"`
+	Sources   []MendableSources `json:"sources"`
 }
+
+type MendableSources struct {
+	ID      int     `json:"id"`
+	Content string  `json:"content"`
+	Score   float64 `json:"score"`
+	Date    *string `json:"date"`
+	Link    string  `json:"link"`
+}
+
+type MendableQueryResponse struct {
+	ConversationID int64
+	Question       string
+	Answer         string
+	Links          []string
+}
+
+/*
+ * Slack API types
+ */
 
 type SlackEvent struct {
 	Token               string `schema:"token"`
@@ -71,11 +81,20 @@ type SlackTextObject struct {
 	Text string `json:"text"`
 }
 
+/*
+
+* Cache types
+
+ */
+
 type CacheItem struct {
 	UserID         string
 	ChannelID      string
 	ConversationID string
+	Question       string
+	Answer         string
 	Timestamp      *time.Time
+	Counter        string
 }
 
 type MendableNewConversationResponse struct {

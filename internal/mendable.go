@@ -2,14 +2,17 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/rs/zerolog/log"
 )
 
-func CreateNewConversation(apiKey, apiURL string) (int64, error) {
+// CreateNewConversation creates a new conversation with Mendable.
+func CreateNewConversation(ctx context.Context, apiKey, apiURL string) (int64, error) {
 
 	requestBody := MendableAPIRequest{
 		ApiKey: apiKey,
@@ -36,6 +39,7 @@ func CreateNewConversation(apiKey, apiURL string) (int64, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Debug().Err(err).Msg("an error occured during the HTTP request")
+		LogError(err)
 		return -1, err
 	}
 	defer resp.Body.Close()
@@ -44,50 +48,103 @@ func CreateNewConversation(apiKey, apiURL string) (int64, error) {
 	err = json.NewDecoder(resp.Body).Decode(&responseBody)
 	if err != nil {
 		log.Debug().Err(err).Msg("error decoding response body")
+		LogError(err)
+		return -1, err
 	}
 
 	return responseBody.ConversationID, nil
 }
 
 // sendDocsQuery sends a query to Mendable and returns the response.
-func sendDocsQuery(query MendableQueryPayload, queryURL string) (MendableResponse, error) {
+func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL string) (MendableQueryResponse, error) {
 
-	requestBody := query
+	var mendableResponse MendableQueryResponse
 
-	jsonBody, err := json.Marshal(requestBody)
-	if err != nil {
-		log.Debug().Err(err).Msg("Error marshalling query body")
-		LogError(err)
-		return MendableResponse{}, err
+	payload := MendableRequestPayload{
+		ApiKey:         query.ApiKey,
+		Question:       query.Question,
+		History:        query.History,
+		ShouldStream:   false,
+		ConversationID: query.ConversationID,
 	}
 
-	req, err := http.NewRequest("POST", queryURL, bytes.NewBuffer(jsonBody))
+	jsonData, err := json.Marshal(payload)
 	if err != nil {
-		log.Debug().Err(err).Msg("error creating new query chat request")
-		LogError(err)
-		return MendableResponse{}, err
+		log.Debug().Err(err).Msg("Error while marshalling payload:")
+		return mendableResponse, err
 	}
-
-	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 15 * time.Second,
 	}
 
-	resp, err := client.Do(req)
+	request, err := http.NewRequest("POST", queryURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		log.Debug().Err(err).Msg("an error occured during the Chat query HTTP request")
+		log.Debug().Err(err).Msg("Error while creating POST request:")
 		LogError(err)
-		return MendableResponse{}, err
+		return mendableResponse, err
 	}
-	defer resp.Body.Close()
 
-	var responseBody []MendableResponse
-	err = json.NewDecoder(resp.Body).Decode(&responseBody)
+	request.Header.Set("Content-Type", "application/json")
+	response, err := client.Do(request)
 	if err != nil {
-		log.Debug().Err(err).Msg("error decoding response body")
+		log.Debug().Err(err).Msg("Error while making POST request:")
+		LogError(err)
+		return mendableResponse, err
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Debug().Err(err).Msg("Error while reading response body:")
+		LogError(err)
+		return mendableResponse, err
 	}
 
-	return responseBody[0], nil
+	var result MendablePayload
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		log.Debug().Err(err).Msg("Error while unmarshalling response:")
+		LogError(err)
+		return mendableResponse, err
+	}
+
+	uniqueLinks := retrieveUniqueLinks(&result.Sources)
+
+	mendableResponse = MendableQueryResponse{
+		Question: query.Question,
+		Answer:   result.Answer.Text,
+		Links:    uniqueLinks,
+	}
+
+	return mendableResponse, nil
+
+}
+
+// retrieveUniqueLinks returns a slice of unique links from the Mendable sources.
+func retrieveUniqueLinks(list *[]MendableSources) []string {
+	uniqueLinks := make([]string, 0)
+	reviewedLinksMap := make(map[string]bool)
+
+	for _, source := range *list {
+
+		link := source.Link
+
+		// Skip links that are equal to "https://docs.spectrocloud.com"
+		if link == "https://docs.spectrocloud.com" {
+			continue
+		}
+
+		// Check if the link already exists in the map
+		if _, exists := reviewedLinksMap[link]; exists {
+			continue
+		}
+
+		// Add the link to the reviewedLinksMap and to the unique links slice
+		reviewedLinksMap[link] = true
+		uniqueLinks = append(uniqueLinks, link)
+	}
+
+	return uniqueLinks
 
 }

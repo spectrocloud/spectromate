@@ -18,64 +18,137 @@ import (
 // Users can ask a question privately or publicly.
 // If the user asks a question privately, the bot will respond privately.
 // If the user asks a question publicly, the bot will respond publicly.
-// Set the private bool to true to ask a question privately.
-func AskCmd(s *SlackRoute, private bool) ([]byte, error) {
+// Set the isPrivate bool to true to ask a question privately.
+func AskCmd(s *SlackRoute, isPrivate bool) {
 
-	var conversationId int64
+	var (
+		conversationId   int64
+		mendableResponse internal.MendableQueryResponse
+		requestCounter   int
+	)
 
 	// Get the user's question.
-	userQuery := strings.Split(strings.Join(strings.Split(s.SlackEvent.Text, " ")[1:], " "), "?")
+	text := strings.Split(strings.Join(strings.Split(s.SlackEvent.Text, " ")[1:], " "), "?")
+	userQuery := strings.Join(text, " ")
 	log.Debug().Msgf("User query: %v", userQuery)
-
-	// sleep for 5 seconds to simulate a long running process.
-	time.Sleep(5 * time.Second)
 
 	// Check if a conversation already exists for this user.
 	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
 		log.Debug().Err(err).Msgf("an error occured when checking for an exiting conversation: %+v", s.SlackEvent)
-		return nil, err
+		return
 	}
 
 	switch isNewConversation {
 	case true:
 		// Create a new conversation.
 		log.Debug().Msgf("Creating a new conversation for user: %v", s.SlackEvent.UserID)
-		id, err := internal.CreateNewConversation(s.mendableApiKey, internal.MendandableNewConversationURL)
+		id, err := internal.CreateNewConversation(s.ctx, s.mendableApiKey, internal.MendandableNewConversationURL)
 		if err != nil {
 			log.Debug().Err(err).Msgf("Error creating new conversation: %+v", s.SlackEvent)
-			return nil, err
+			return
 		}
 		conversationId = id
+		questionRequestItem := internal.MendableRequestPayload{
+			ApiKey:         s.mendableApiKey,
+			Question:       userQuery,
+			History:        []internal.HistoryItems{},
+			ConversationID: conversationId,
+			ShouldStream:   false,
+		}
+
+		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL)
+		if err != nil {
+			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.SlackEvent)
+			internal.LogError(err)
+			return
+		}
+		// Set the question counter to 1.
+		requestCounter = 1
+
 	default:
 		// Use the existing conversation.
+		log.Debug().Msgf("Using existing conversation for user: %v", s.SlackEvent.UserID)
+
+		// Parse the conversation ID.
+		cID, err := strconv.ParseInt(cacheItem.ConversationID, 10, 64)
+		if err != nil {
+			log.Debug().Err(err).Msgf("Error parsing conversation ID: %+v", s.SlackEvent)
+			internal.LogError(err)
+			return
+		}
+
+		// Get the current question counter.
+		cNew, err := strconv.ParseInt(cacheItem.Counter, 10, 64)
+		if err != nil {
+			log.Debug().Err(err).Msgf("Error parsing conversation ID: %+v", s.SlackEvent)
+			internal.LogError(err)
+			return
+		}
+		requestCounter = int(cNew)
+		conversationId = cID
+		questionRequestItem := internal.MendableRequestPayload{
+			ApiKey:   s.mendableApiKey,
+			Question: userQuery,
+			History: []internal.HistoryItems{
+				{
+					Prompt:   cacheItem.Question,
+					Response: cacheItem.Answer,
+				},
+			},
+			ConversationID: conversationId,
+			ShouldStream:   false,
+		}
+
+		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL)
+		if err != nil {
+			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.SlackEvent)
+			internal.LogError(err)
+			return
+		}
+
+		requestCounter++
+
 	}
 
 	log.Debug().Msgf("ChacheItem: %v", cacheItem)
 
-	markdownContent := "Aspernatur ut est delectus molestias consequatur quo explicabo nesciunt impedit aut. Doloremque nesciunt fuga exercitationem architecto ut rerum porro soluta ducimus. Unde in eveniet aut magni qui assumenda laborum iusto hic consequatur ad debitis nostrum labore. Deserunt quaerat iusto neque sit labore totam similique corporis magni corrupti. Consequatur et omnis ducimus expedita beatae explicabo blanditiis voluptatem eius aliquam veritatis nulla autem id quia. Et eligendi sunt sit nesciunt architecto quas molestiae excepturi dolorem enim id et dolor cum. Cum consequatur quo nemo ut et ex et non et. Placeat cum esse ut eaque debitis quo quas non molestias accusantium fugit temporibus ut at sequi. Ipsum similique molestiae voluptas mollitia voluptates perferendis deserunt."
+	linksString := linksBuilderString(mendableResponse.Links)
+	markdownContent := fmt.Sprintf("*Answer* \n\n %v", userQuery)
 
-	err = storeUserEntry(s.ctx, s, conversationId)
+	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter)
 	if err != nil {
 		log.Debug().Err(err).Msgf("Error storing user entry: %+v", s.SlackEvent)
-		return nil, err
+		return
 	}
 
-	returnPayload, err := askMarkdownPayload(markdownContent, "Docs Answer")
+	slackReplyPayload, err := askMarkdownPayload(markdownContent, linksString, "Docs Answer", isPrivate)
 	if err != nil {
 		log.Info().Err(err).Msg("Error creating markdown payload.")
-		return nil, err
+		return
 	}
 
-	return returnPayload, nil
+	err = internal.ReplyWithAnswer(s.SlackEvent.ResponseURL, slackReplyPayload, isPrivate)
+	if err != nil {
+		log.Info().Err(err).Msg("Error replying with answer.")
+		internal.LogError(err)
+		return
+	}
 }
 
 // // createMarkdownPayload creates a Slack payload with a markdown block
-func askMarkdownPayload(content, title string) ([]byte, error) {
+func askMarkdownPayload(content, links, title string, isPrivate bool) ([]byte, error) {
 	log.Info().Msgf("Incoming Message: %v", content)
 
+	var responseType string
+	if isPrivate {
+		responseType = "ephemeral"
+	} else {
+		responseType = "in_channel"
+	}
+
 	payload := internal.SlackPayload{
-		ReponseType: "in_channel",
+		ReponseType: responseType,
 		Blocks: []internal.SlackBlock{
 			{
 				Type: "header",
@@ -92,6 +165,16 @@ func askMarkdownPayload(content, title string) ([]byte, error) {
 				Text: &internal.SlackTextObject{
 					Type: "mrkdwn",
 					Text: content,
+				},
+			},
+			{
+				Type: "divider",
+			},
+			{
+				Type: "section",
+				Text: &internal.SlackTextObject{
+					Type: "mrkdwn",
+					Text: links,
 				},
 			},
 		},
@@ -114,7 +197,7 @@ func askMarkdownPayload(content, title string) ([]byte, error) {
 // - Channel ID
 // - Conversation ID
 // - Timestamp
-func storeUserEntry(ctx context.Context, s *SlackRoute, conversationId int64) error {
+func storeUserEntry(ctx context.Context, s *SlackRoute, response internal.MendableQueryResponse, counter int) error {
 
 	tNow := time.Now()
 
@@ -123,8 +206,11 @@ func storeUserEntry(ctx context.Context, s *SlackRoute, conversationId int64) er
 	cacheItem := map[string]interface{}{
 		"UserID":         s.SlackEvent.UserID,
 		"ChannelID":      s.SlackEvent.ChannelID,
-		"ConversationID": conversationId,
+		"ConversationID": response.ConversationID,
+		"Question":       response.Question,
+		"Answer":         response.Answer,
 		"Timestamp":      &tNow,
+		"Counter":        counter,
 	}
 
 	err := s.cache.HSet(ctx, primaryKey, cacheItem).Err()
@@ -168,6 +254,9 @@ func getUserCache(ctx context.Context, s *SlackRoute) (bool, *internal.CacheItem
 		UserID:         result["UserID"],
 		ChannelID:      result["ChannelID"],
 		ConversationID: result["ConversationID"],
+		Answer:         result["Answer"],
+		Question:       result["Question"],
+		Counter:        result["Counter"],
 	}
 
 	if timestamp, ok := result["Timestamp"]; ok {
@@ -180,4 +269,14 @@ func getUserCache(ctx context.Context, s *SlackRoute) (bool, *internal.CacheItem
 	log.Debug().Msgf("Retrieved user cache from cache: %v", cacheItem)
 
 	return true, cacheItem, nil
+}
+
+// linksBuilderString builds a string of links.
+func linksBuilderString(urls []string) string {
+	var sb strings.Builder
+	sb.WriteString("*Sources*:\n")
+	for _, url := range urls {
+		sb.WriteString(fmt.Sprintf("- [%s](%s)\n", url, url))
+	}
+	return sb.String()
 }
