@@ -1,4 +1,4 @@
-package commands
+package endpoints
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
+	"spectrocloud.com/docs-slack-bot/endpoints/slackcmds"
 	"spectrocloud.com/docs-slack-bot/internal"
 )
 
@@ -71,28 +72,41 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 
 	switch cmd {
 	case Help:
-		returnPayload, err = HelpCmd()
+		returnPayload, err = slackcmds.HelpCmd()
 		if err != nil {
 			internal.LogError(err)
 			log.Info().Err(err).Msg(internal.SlackDefaultUserErrorMessage)
 			return nil, err
 		}
 	case Ask:
+		slackRequestInfo := slackcmds.NewSlackAskRequest(
+			slack.ctx,
+			slack.SlackEvent,
+			slack.mendableApiKey,
+			slack.cache,
+		)
+
 		err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, false)
 		if err != nil {
 			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
 			return nil, err
 		}
-		go AskCmd(slack, false)
+		go slackcmds.AskCmd(slackRequestInfo, false)
 	case PAsk:
+		slackRequestInfo := slackcmds.NewSlackAskRequest(
+			slack.ctx,
+			slack.SlackEvent,
+			slack.mendableApiKey,
+			slack.cache,
+		)
 		err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, true)
 		if err != nil {
 			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
 			return nil, err
 		}
-		go AskCmd(slack, true)
+		go slackcmds.AskCmd(slackRequestInfo, true)
 	default:
-		returnPayload, err = HelpCmd()
+		returnPayload, err = slackcmds.HelpCmd()
 		if err != nil {
 			log.Info().Err(err).Msg(internal.SlackDefaultUserErrorMessage)
 			return nil, err

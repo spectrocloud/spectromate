@@ -1,4 +1,4 @@
-package commands
+package slackcmds
 
 import (
 	"context"
@@ -13,13 +13,25 @@ import (
 	"spectrocloud.com/docs-slack-bot/internal"
 )
 
+type SlackAskRequest struct {
+	ctx            context.Context
+	slackEvent     *internal.SlackEvent
+	mendableAPIKey string
+	cache          *redis.Client
+}
+
+// NewSlackAskRequest returns a new SlackAskRequest.
+func NewSlackAskRequest(ctx context.Context, slackEvent *internal.SlackEvent, mendableAPIKey string, cache *redis.Client) *SlackAskRequest {
+	return &SlackAskRequest{ctx, slackEvent, mendableAPIKey, cache}
+}
+
 // The ask command is used to ask a question about the docs.
 // The user will be prompted to enter their question.
 // Users can ask a question privately or publicly.
 // If the user asks a question privately, the bot will respond privately.
 // If the user asks a question publicly, the bot will respond publicly.
 // Set the isPrivate bool to true to ask a question privately.
-func AskCmd(s *SlackRoute, isPrivate bool) {
+func AskCmd(s *SlackAskRequest, isPrivate bool) {
 
 	var (
 		conversationId   int64
@@ -29,7 +41,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 	log.Debug().Msgf("The message is private: %v", isPrivate)
 	// This will get the user's question.
 	// Split the string on spaces
-	words := strings.Split(s.SlackEvent.Text, " ")[1:]
+	words := strings.Split(s.slackEvent.Text, " ")[1:]
 	lastWord := words[len(words)-1]
 	userQuery := strings.Join(words[:len(words)-1], " ") + " " + strings.TrimRight(lastWord, "\r\n")
 
@@ -39,23 +51,23 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 	// Check if a conversation already exists for this user.
 	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
-		log.Debug().Err(err).Msgf("an error occured when checking for an exiting conversation: %+v", s.SlackEvent)
+		log.Debug().Err(err).Msgf("an error occured when checking for an exiting conversation: %+v", s.slackEvent)
 		return
 	}
 
 	switch isNewConversation {
 	case true:
 		// Create a new conversation.
-		log.Debug().Msgf("Creating a new conversation for user: %v", s.SlackEvent.UserID)
-		id, err := internal.CreateNewConversation(s.ctx, s.mendableApiKey, internal.MendandableNewConversationURL)
+		log.Debug().Msgf("Creating a new conversation for user: %v", s.slackEvent.UserID)
+		id, err := internal.CreateNewConversation(s.ctx, s.mendableAPIKey, internal.MendandableNewConversationURL)
 		if err != nil {
-			log.Debug().Err(err).Msgf("Error creating new conversation: %+v", s.SlackEvent)
+			log.Debug().Err(err).Msgf("Error creating new conversation: %+v", s.slackEvent)
 			return
 		}
 
 		conversationId = id
 		questionRequestItem := internal.MendableRequestPayload{
-			ApiKey:         s.mendableApiKey,
+			ApiKey:         s.mendableAPIKey,
 			Question:       userQuery,
 			History:        []internal.HistoryItems{},
 			ConversationID: conversationId,
@@ -64,7 +76,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 
 		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL)
 		if err != nil {
-			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.SlackEvent)
+			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.slackEvent)
 			internal.LogError(err)
 			return
 		}
@@ -74,12 +86,12 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 
 	default:
 		// Use the existing conversation.
-		log.Debug().Msgf("Using existing conversation for user: %v", s.SlackEvent.UserID)
+		log.Debug().Msgf("Using existing conversation for user: %v", s.slackEvent.UserID)
 
 		// Parse the conversation ID.
 		cID, err := strconv.ParseInt(cacheItem.ConversationID, 10, 64)
 		if err != nil {
-			log.Debug().Err(err).Msgf("Error parsing conversation ID: %+v", s.SlackEvent)
+			log.Debug().Err(err).Msgf("Error parsing conversation ID: %+v", s.slackEvent)
 			internal.LogError(err)
 			return
 		}
@@ -87,14 +99,14 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 		// Get the current question counter.
 		cNew, err := strconv.ParseInt(cacheItem.Counter, 10, 64)
 		if err != nil {
-			log.Debug().Err(err).Msgf("Error parsing conversation ID: %+v", s.SlackEvent)
+			log.Debug().Err(err).Msgf("Error parsing conversation ID: %+v", s.slackEvent)
 			internal.LogError(err)
 			return
 		}
 		requestCounter = int(cNew)
 		conversationId = cID
 		questionRequestItem := internal.MendableRequestPayload{
-			ApiKey:   s.mendableApiKey,
+			ApiKey:   s.mendableAPIKey,
 			Question: userQuery,
 			History: []internal.HistoryItems{
 				{
@@ -108,7 +120,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 
 		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL)
 		if err != nil {
-			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.SlackEvent)
+			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.slackEvent)
 			internal.LogError(err)
 			return
 		}
@@ -124,7 +136,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 
 	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter)
 	if err != nil {
-		log.Debug().Err(err).Msgf("Error storing user entry: %+v", s.SlackEvent)
+		log.Debug().Err(err).Msgf("Error storing user entry: %+v", s.slackEvent)
 		return
 	}
 
@@ -134,7 +146,7 @@ func AskCmd(s *SlackRoute, isPrivate bool) {
 		return
 	}
 
-	err = internal.ReplyWithAnswer(s.SlackEvent.ResponseURL, slackReplyPayload, isPrivate)
+	err = internal.ReplyWithAnswer(s.slackEvent.ResponseURL, slackReplyPayload, isPrivate)
 	if err != nil {
 		log.Info().Err(err).Msg("Error replying with answer.")
 		internal.LogError(err)
@@ -201,17 +213,17 @@ func askMarkdownPayload(content, links, title string, isPrivate bool) ([]byte, e
 // Values stored in the cache are:
 // - User ID
 // - Channel ID
-// - Conversation ID
+// - Conversation IDSlackCommandsIntf
 // - Timestamp
-func storeUserEntry(ctx context.Context, s *SlackRoute, response internal.MendableQueryResponse, counter int) error {
+func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.MendableQueryResponse, counter int) error {
 
 	tNow := time.Now()
 
-	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.SlackEvent.UserID, s.SlackEvent.ChannelID)
+	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.slackEvent.UserID, s.slackEvent.ChannelID)
 
 	cacheItem := map[string]interface{}{
-		"UserID":         s.SlackEvent.UserID,
-		"ChannelID":      s.SlackEvent.ChannelID,
+		"UserID":         s.slackEvent.UserID,
+		"ChannelID":      s.slackEvent.ChannelID,
 		"ConversationID": response.ConversationID,
 		"Question":       response.Question,
 		"Answer":         response.Answer,
@@ -238,8 +250,8 @@ func storeUserEntry(ctx context.Context, s *SlackRoute, response internal.Mendab
 // getUserCache retrieves the entire cache item from the cache.
 // If the cache item is not found, it returns false and a nil cache item.
 // If an error occurs, it returns false and the error.
-func getUserCache(ctx context.Context, s *SlackRoute) (bool, *internal.CacheItem, error) {
-	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.SlackEvent.UserID, s.SlackEvent.ChannelID)
+func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.CacheItem, error) {
+	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.slackEvent.UserID, s.slackEvent.ChannelID)
 
 	result, err := s.cache.HGetAll(ctx, primaryKey).Result()
 	if err != nil {

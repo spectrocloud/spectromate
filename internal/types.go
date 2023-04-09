@@ -1,6 +1,8 @@
 package internal
 
-import "time"
+import (
+	"time"
+)
 
 /*
  * Mendable API types

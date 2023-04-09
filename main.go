@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	_ "go.uber.org/automaxprocs"
-	"spectrocloud.com/docs-slack-bot/commands"
+	"spectrocloud.com/docs-slack-bot/endpoints"
 	"spectrocloud.com/docs-slack-bot/internal"
 )
 
@@ -81,8 +81,8 @@ func init() {
 func main() {
 	ctx := context.Background()
 	rdb := globalRedisClient
-	healthRoute := commands.NewHealthHandlerContext(ctx)
-	slackRoute := commands.NewHelpHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, rdb)
+	healthRoute := endpoints.NewHealthHandlerContext(ctx)
+	slackRoute := endpoints.NewHelpHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, rdb)
 
 	http.HandleFunc(internal.ApiPrefixV1+"health", healthRoute.HealthHTTPHandler)
 	http.HandleFunc(internal.ApiPrefixV1+"slack", slackRoute.SlackHTTPHandler)

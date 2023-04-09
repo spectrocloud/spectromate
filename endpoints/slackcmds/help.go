@@ -1,4 +1,4 @@
-package commands
+package slackcmds
 
 import (
 	"encoding/json"
