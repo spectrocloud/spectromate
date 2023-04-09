@@ -10,10 +10,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/avast/retry-go"
 	"github.com/gorilla/schema"
@@ -149,7 +151,6 @@ func ReplyWithAnswer(responseURL string, payload []byte, isPrivate bool) error {
 	// This is to prevent the function from failing if Slack is slow to respond.
 	err := retry.Do(
 		func() error {
-
 			client := &http.Client{}
 			req, err := http.NewRequest("POST", responseURL, bytes.NewBuffer(payload))
 			if err != nil {
@@ -165,14 +166,20 @@ func ReplyWithAnswer(responseURL string, payload []byte, isPrivate bool) error {
 				return err
 			}
 			defer res.Body.Close()
-			if res.StatusCode >= 400 {
+			if res.StatusCode != http.StatusOK {
+				rawError, err := ioutil.ReadAll(res.Body)
+				if err != nil {
+					log.Debug().Err(err).Msg("unable to read error from the Slack answer reply back HTTP request in an error scenairo")
+					LogError(err)
+				}
+				erroString := string(rawError)
 				log.Debug().Msgf("error encountered while sending the Slack answer reply back HTTP request, status code: %d", res.StatusCode)
-				err := errors.New("slack error encountered while sending the Slack answer reply back to HTTP request")
+				err = errors.New(erroString)
 				LogError(err)
 				return err
 			}
 			return nil
-		}, retry.Attempts(3), retry.LastErrorOnly(true),
+		}, retry.Attempts(3), retry.Delay(2*time.Second), retry.LastErrorOnly(true),
 	)
 	if err != nil {
 		log.Debug().Err(err).Msg("error encountered while sending the Slack answer reply back HTTP request")

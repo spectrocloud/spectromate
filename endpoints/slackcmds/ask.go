@@ -122,7 +122,11 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		if err != nil {
 			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.slackEvent)
 			internal.LogError(err)
-			return
+			mendableResponse = internal.MendableQueryResponse{
+				Answer:         ":robot: I'm sorry, I'm having technical issues. Please try again later.",
+				Question:       userQuery,
+				ConversationID: conversationId,
+			}
 		}
 
 		requestCounter++
@@ -168,8 +172,7 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 	}
 
 	payload := internal.SlackPayload{
-		ResponseType:    responseType,
-		ReplaceOriginal: true,
+		ResponseType: responseType,
 		Blocks: []internal.SlackBlock{
 			{
 				Type: "header",
@@ -306,7 +309,7 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 func linksBuilderString(urls []string) string {
 
 	if len(urls) == 0 {
-		return ""
+		return ":mag: Unable identify a specific documentation URL."
 	}
 
 	var sb strings.Builder

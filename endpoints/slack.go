@@ -36,6 +36,8 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 	// Set the slack event in the SlackRoute struct so it can be used by the other handlers.
 	slack.SlackEvent = &event
 
+	log.Debug().Msgf("Event: %+v", event)
+
 	log.Debug().Msgf("User: %+v", event.UserName)
 	log.Debug().Msgf("UserId: %+v", event.UserID)
 	log.Debug().Msgf("Channel: %+v", event.ChannelName)
