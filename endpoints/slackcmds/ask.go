@@ -140,7 +140,9 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		return
 	}
 
-	slackReplyPayload, err := askMarkdownPayload(markdownContent, linksString, "Docs Answer", isPrivate)
+	q := fmt.Sprintf(`:question: %v`, mendableResponse.Question)
+
+	slackReplyPayload, err := askMarkdownPayload(markdownContent, q, linksString, "Docs Answer", isPrivate)
 	if err != nil {
 		log.Info().Err(err).Msg("Error creating markdown payload.")
 		return
@@ -148,14 +150,14 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 
 	err = internal.ReplyWithAnswer(s.slackEvent.ResponseURL, slackReplyPayload, isPrivate)
 	if err != nil {
-		log.Info().Err(err).Msg("Error replying with answer.")
+		log.Info().Err(err).Msg("Error when attempting to return the answer back to Slack.")
 		internal.LogError(err)
-		return
+		// Waiting 5 seconds before returning the error to Slack.
 	}
 }
 
 // // createMarkdownPayload creates a Slack payload with a markdown block
-func askMarkdownPayload(content, links, title string, isPrivate bool) ([]byte, error) {
+func askMarkdownPayload(content, question, links, title string, isPrivate bool) ([]byte, error) {
 	log.Info().Msgf("Incoming Message: %v", content)
 
 	var responseType string
@@ -166,13 +168,24 @@ func askMarkdownPayload(content, links, title string, isPrivate bool) ([]byte, e
 	}
 
 	payload := internal.SlackPayload{
-		ResponseType: responseType,
+		ResponseType:    responseType,
+		ReplaceOriginal: true,
 		Blocks: []internal.SlackBlock{
 			{
 				Type: "header",
 				Text: &internal.SlackTextObject{
 					Type: "plain_text",
 					Text: title,
+				},
+			},
+			{
+				Type: "divider",
+			},
+			{
+				Type: "section",
+				Text: &internal.SlackTextObject{
+					Type: "mrkdwn",
+					Text: question,
 				},
 			},
 			{
@@ -291,10 +304,15 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 
 // linksBuilderString builds a string of links.
 func linksBuilderString(urls []string) string {
+
+	if len(urls) == 0 {
+		return ""
+	}
+
 	var sb strings.Builder
 	sb.WriteString("*Sources*:\n")
 	for _, url := range urls {
-		sb.WriteString(fmt.Sprintf("- [%s](%s)\n", url, url))
+		sb.WriteString(fmt.Sprintf("- %s\n", url))
 	}
 	return sb.String()
 }

@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/avast/retry-go"
 	"github.com/gorilla/schema"
 	"github.com/rs/zerolog/log"
 )
@@ -116,7 +117,7 @@ func ReplyStatus200(responseURL string, writer http.ResponseWriter, isPrivate bo
 	}
 
 	markdownContent := GetRandomWaitMessage()
-	returnValue, err := genericMarkdownPayload("Docs Answer", markdownContent, isPrivate)
+	returnValue, err := waitMessagePayload("Docs Answer", markdownContent, isPrivate)
 	if err != nil {
 		LogError(err)
 		log.Error().Err(err).Msg("Error creating Slack 200 markdown payload.")
@@ -144,48 +145,49 @@ func ReplyWithAnswer(responseURL string, payload []byte, isPrivate bool) error {
 		return err
 	}
 
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", responseURL, bytes.NewBuffer(payload))
-	if err != nil {
-		log.Debug().Err(err).Msg("error creating the reply back HTTP request")
-		LogError(err)
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
+	// Retry the request to Slack up to 3 times.
+	// This is to prevent the function from failing if Slack is slow to respond.
+	err := retry.Do(
+		func() error {
 
-	res, err := client.Do(req)
+			client := &http.Client{}
+			req, err := http.NewRequest("POST", responseURL, bytes.NewBuffer(payload))
+			if err != nil {
+				log.Debug().Err(err).Msg("error creating the reply back HTTP request")
+				LogError(err)
+				return err
+			}
+			req.Header.Set("Content-Type", "application/json")
+			res, err := client.Do(req)
+			if err != nil {
+				log.Debug().Err(err).Msg("error encountered while sending the Slack answer reply back HTTP request")
+				LogError(err)
+				return err
+			}
+			defer res.Body.Close()
+			if res.StatusCode >= 400 {
+				log.Debug().Msgf("error encountered while sending the Slack answer reply back HTTP request, status code: %d", res.StatusCode)
+				err := errors.New("slack error encountered while sending the Slack answer reply back to HTTP request")
+				LogError(err)
+				return err
+			}
+			return nil
+		}, retry.Attempts(3), retry.LastErrorOnly(true),
+	)
 	if err != nil {
-		log.Debug().Err(err).Msg("error encountered while sending the Slack anser reply back HTTP request")
+		log.Debug().Err(err).Msg("error encountered while sending the Slack answer reply back HTTP request")
 		LogError(err)
 		return err
-	}
-	defer res.Body.Close()
-	if res.StatusCode >= 400 {
-		return fmt.Errorf("request failed with status code: %d", res.StatusCode)
 	}
 
 	return nil
 }
 
-func genericMarkdownPayload(title, content string, isPrivate bool) ([]byte, error) {
-
-	var ResponseType string
-	if isPrivate {
-		ResponseType = "ephemeral"
-	} else {
-		ResponseType = "in_channel"
-	}
+func waitMessagePayload(title, content string, isPrivate bool) ([]byte, error) {
 
 	payload := SlackPayload{
-		ResponseType: ResponseType,
+		ResponseType: "ephemeral",
 		Blocks: []SlackBlock{
-			{
-				Type: "header",
-				Text: &SlackTextObject{
-					Type: "plain_text",
-					Text: title,
-				},
-			},
 			{
 				Type: "section",
 				Text: &SlackTextObject{
