@@ -172,7 +172,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		log.Info().Err(err).Msg("Error when attempting to return the answer back to Slack.")
 		internal.LogError(err)
 		globalErr = &err
-		// Waiting 5 seconds before returning the error to Slack.
+		return
 	}
 }
 
@@ -235,6 +235,8 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 		return []byte{}, err
 	}
 
+	log.Debug().Msgf("Slack Reply Payload: %v", string(payloadBytes))
+
 	return payloadBytes, nil
 }
 
@@ -253,6 +255,20 @@ func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.M
 
 	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.slackEvent.UserID, s.slackEvent.ChannelID)
 
+	hst := internal.HistoryItems{
+		Prompt:   response.Question,
+		Response: response.Answer,
+	}
+
+	jsonBytes, err := json.Marshal(hst)
+	if err != nil {
+		internal.LogError(err)
+		log.Error().Err(err).Msg("error marshalling history item to JSON for cache.")
+		return err
+	}
+
+	historyJSON := string(jsonBytes)
+
 	cacheItem := map[string]interface{}{
 		"UserID":         s.slackEvent.UserID,
 		"ChannelID":      s.slackEvent.ChannelID,
@@ -261,9 +277,10 @@ func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.M
 		"Answer":         response.Answer,
 		"Timestamp":      &tNow,
 		"Counter":        counter,
+		"History":        historyJSON,
 	}
 
-	err := s.cache.HSet(ctx, primaryKey, cacheItem).Err()
+	err = s.cache.HSet(ctx, primaryKey, cacheItem).Err()
 	if err != nil {
 		log.Error().Err(err).Msg("Error storing user entry in cache.")
 		return err
@@ -325,7 +342,7 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 func linksBuilderString(urls []string) string {
 
 	if len(urls) == 0 {
-		return ":mag: Unable identify a specific documentation URL."
+		return `:mag: Unable identify a specific documentation URL.`
 	}
 
 	var sb strings.Builder

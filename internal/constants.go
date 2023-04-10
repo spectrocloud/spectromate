@@ -11,6 +11,7 @@ const (
 	MendandableNewConversationURL string = "https://api.mendable.ai/v0/newConversation"
 	MendableChatQueryURL          string = "https://api.mendable.ai/v0/mendableChat"
 	DefaultUserErrorMessage       string = `:warning: I'm sorry, I'm having technical issues. Notify the the docs team @ #docs and please try again later.`
+	DefaultNotFoundResponse       string = `I'm sorry, I couldn't find an answer to your question. Please provide me feedback and try rephrasing your question.`
 )
 
 // GetRandomWaitMessage returns a random wait message.

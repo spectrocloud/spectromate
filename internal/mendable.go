@@ -122,6 +122,11 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 		Links:          uniqueLinks,
 	}
 
+	if mendableResponse.Answer == "" {
+		// Set default response if the Answer field is empty
+		mendableResponse.Answer = DefaultNotFoundResponse
+	}
+
 	log.Debug().Msgf("Mendable Question response: %v", mendableResponse)
 
 	return mendableResponse, nil
