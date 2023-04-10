@@ -60,7 +60,6 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	// Check if a conversation already exists for this user.
 	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
-		internal.LogError(err)
 		log.Debug().Err(err).Msgf("an error occured when checking for an exiting conversation: %+v", s.slackEvent)
 		globalErr = &err
 		return
@@ -123,9 +122,14 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		requestCounter = int(cNew)
 		conversationId = cID
 		questionRequestItem := internal.MendableRequestPayload{
-			ApiKey:         s.mendableAPIKey,
-			Question:       userQuery,
-			History:        cacheItem.History,
+			ApiKey:   s.mendableAPIKey,
+			Question: userQuery,
+			History: []internal.HistoryItems{
+				{
+					Prompt:   cacheItem.Question,
+					Response: cacheItem.Answer,
+				},
+			},
 			ConversationID: conversationId,
 			ShouldStream:   false,
 		}
@@ -147,7 +151,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	linksString := linksBuilderString(mendableResponse.Links)
 	markdownContent := fmt.Sprintf(`%v`, mendableResponse.Answer)
 
-	err = storeUserEntry(s.ctx, s, mendableResponse, cacheItem.History, requestCounter)
+	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter)
 	if err != nil {
 		log.Debug().Err(err).Msgf("Error storing user entry: %+v", s.slackEvent)
 		globalErr = &err
@@ -168,7 +172,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		log.Info().Err(err).Msg("Error when attempting to return the answer back to Slack.")
 		internal.LogError(err)
 		globalErr = &err
-		return
+		// Waiting 5 seconds before returning the error to Slack.
 	}
 }
 
@@ -231,8 +235,6 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 		return []byte{}, err
 	}
 
-	log.Debug().Msgf("Slack Reply Payload: %v", string(payloadBytes))
-
 	return payloadBytes, nil
 }
 
@@ -245,27 +247,11 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 // - Channel ID
 // - Conversation IDSlackCommandsIntf
 // - Timestamp
-func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.MendableQueryResponse, previousHist []internal.HistoryItems, counter int) error {
+func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.MendableQueryResponse, counter int) error {
 
 	tNow := time.Now()
 
 	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.slackEvent.UserID, s.slackEvent.ChannelID)
-
-	hst := internal.HistoryItems{
-		Prompt:   response.Question,
-		Response: response.Answer,
-	}
-
-	previousHist = append(previousHist, hst)
-
-	jsonBytes, err := json.Marshal(previousHist)
-	if err != nil {
-		internal.LogError(err)
-		log.Error().Err(err).Msg("error marshalling history item to JSON for cache.")
-		return err
-	}
-
-	historyJSON := string(jsonBytes)
 
 	cacheItem := map[string]interface{}{
 		"UserID":         s.slackEvent.UserID,
@@ -275,10 +261,9 @@ func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.M
 		"Answer":         response.Answer,
 		"Timestamp":      &tNow,
 		"Counter":        counter,
-		"History":        historyJSON,
 	}
 
-	err = s.cache.HSet(ctx, primaryKey, cacheItem).Err()
+	err := s.cache.HSet(ctx, primaryKey, cacheItem).Err()
 	if err != nil {
 		log.Error().Err(err).Msg("Error storing user entry in cache.")
 		return err
@@ -303,18 +288,15 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 	result, err := s.cache.HGetAll(ctx, primaryKey).Result()
 	if err != nil {
 		if err == redis.Nil {
-			internal.LogError(err)
 			log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
 			return true, nil, nil
 		}
-		internal.LogError(err)
 		log.Error().Err(err).Msg("Error retrieving user cache from cache.")
 		return false, nil, err
 	}
 
 	if len(result) == 0 {
 		log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
-		internal.LogError(err)
 		return true, nil, nil
 	}
 
@@ -343,7 +325,7 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 func linksBuilderString(urls []string) string {
 
 	if len(urls) == 0 {
-		return `:mag: Unable identify a specific documentation URL.`
+		return ":mag: Unable identify a specific documentation URL."
 	}
 
 	var sb strings.Builder
