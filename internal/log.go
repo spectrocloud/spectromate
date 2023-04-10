@@ -31,23 +31,6 @@ func InitLogger(logLevel string) {
 	}
 }
 
-// If the error is not nil, panic.
-// Only use this in init().
-func PanicErr(err error) {
-	if err != nil {
-		log.Fatal().Send()
-	}
-}
-
-// If the ok value is false, panic.
-// If the error is not nil, panic.
-// Only use this in init().
-func PanicOkErr(ok bool, err error) {
-	if err != nil || !ok {
-		log.Fatal().Send()
-	}
-}
-
 func LogError(err error) {
 	pc, file, line, ok := runtime.Caller(1)
 	if ok {

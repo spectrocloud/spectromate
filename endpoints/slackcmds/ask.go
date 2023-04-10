@@ -37,8 +37,17 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		conversationId   int64
 		mendableResponse internal.MendableQueryResponse
 		requestCounter   int
+		globalErr        *error
 	)
-	log.Debug().Msgf("The message is private: %v", isPrivate)
+	// This will run after the current function returns.
+	// This will check if an error occurred and send an error message to the user.
+	// This acts as a catch all for any errors that may occur and notifiy the user.
+	// A pointer value is used to workaround defer's default behavior of evaulating the arguments immediately.
+	defer func() {
+		errorEval(s.ctx, globalErr, s, isPrivate)
+		globalErr = nil
+	}()
+
 	// This will get the user's question.
 	// Split the string on spaces
 	words := strings.Split(s.slackEvent.Text, " ")[1:]
@@ -52,8 +61,11 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
 		log.Debug().Err(err).Msgf("an error occured when checking for an exiting conversation: %+v", s.slackEvent)
+		globalErr = &err
 		return
 	}
+
+	// This catches any errors that may occur and returns an error message to the user.
 
 	switch isNewConversation {
 	case true:
@@ -62,6 +74,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		id, err := internal.CreateNewConversation(s.ctx, s.mendableAPIKey, internal.MendandableNewConversationURL)
 		if err != nil {
 			log.Debug().Err(err).Msgf("Error creating new conversation: %+v", s.slackEvent)
+			globalErr = &err
 			return
 		}
 
@@ -76,8 +89,9 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 
 		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL)
 		if err != nil {
-			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.slackEvent)
 			internal.LogError(err)
+			globalErr = &err
+			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.slackEvent)
 			return
 		}
 
@@ -93,6 +107,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		if err != nil {
 			log.Debug().Err(err).Msgf("Error parsing conversation ID: %+v", s.slackEvent)
 			internal.LogError(err)
+			globalErr = &err
 			return
 		}
 
@@ -101,6 +116,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		if err != nil {
 			log.Debug().Err(err).Msgf("Error parsing conversation ID: %+v", s.slackEvent)
 			internal.LogError(err)
+			globalErr = &err
 			return
 		}
 		requestCounter = int(cNew)
@@ -122,11 +138,8 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		if err != nil {
 			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.slackEvent)
 			internal.LogError(err)
-			mendableResponse = internal.MendableQueryResponse{
-				Answer:         ":robot: I'm sorry, I'm having technical issues. Please try again later.",
-				Question:       userQuery,
-				ConversationID: conversationId,
-			}
+			globalErr = &err
+			return
 		}
 
 		requestCounter++
@@ -141,6 +154,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter)
 	if err != nil {
 		log.Debug().Err(err).Msgf("Error storing user entry: %+v", s.slackEvent)
+		globalErr = &err
 		return
 	}
 
@@ -149,6 +163,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	slackReplyPayload, err := askMarkdownPayload(markdownContent, q, linksString, "Docs Answer", isPrivate)
 	if err != nil {
 		log.Info().Err(err).Msg("Error creating markdown payload.")
+		globalErr = &err
 		return
 	}
 
@@ -156,6 +171,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	if err != nil {
 		log.Info().Err(err).Msg("Error when attempting to return the answer back to Slack.")
 		internal.LogError(err)
+		globalErr = &err
 		// Waiting 5 seconds before returning the error to Slack.
 	}
 }
@@ -318,4 +334,18 @@ func linksBuilderString(urls []string) string {
 		sb.WriteString(fmt.Sprintf("- %s\n", url))
 	}
 	return sb.String()
+}
+
+func errorEval(ctx context.Context, e *error, s *SlackAskRequest, isPrivate bool) {
+
+	log.Debug().Msgf("Error evaluating the answer: %v", e)
+
+	if e != nil {
+		err := internal.ReplyWithErrorMessage(s.slackEvent.ResponseURL, isPrivate)
+		if err != nil {
+			log.Error().Err(err).Msg("Error when attempting to return the answer back to Slack.")
+			internal.LogError(err)
+			return
+		}
+	}
 }

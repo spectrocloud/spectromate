@@ -179,7 +179,65 @@ func ReplyWithAnswer(responseURL string, payload []byte, isPrivate bool) error {
 				return err
 			}
 			return nil
-		}, retry.Attempts(3), retry.Delay(2*time.Second), retry.LastErrorOnly(true),
+		}, retry.Attempts(3), retry.Delay(3*time.Second), retry.LastErrorOnly(true),
+	)
+	if err != nil {
+		log.Debug().Err(err).Msg("error encountered while sending the Slack answer reply back HTTP request")
+		LogError(err)
+		return err
+	}
+
+	return nil
+}
+
+func ReplyWithErrorMessage(responseURL string, isPrivate bool) error {
+	if responseURL == "" {
+		err := errors.New("response URL is empty")
+		log.Debug().Err(err).Msg("error encountered while sending the Slack 200 OK reply back HTTP request")
+		LogError(err)
+		return err
+	}
+
+	clientMessage, err := errorMessagePayload(DefaultUserErrorMessage, isPrivate)
+	if err != nil {
+		LogError(err)
+		log.Error().Err(err).Msg("error creating the user error message markdown payload.")
+		return err
+	}
+
+	// Retry the request to Slack up to 3 times.
+	// This is to prevent the function from failing if Slack is slow to respond.
+	err = retry.Do(
+		func() error {
+			client := &http.Client{}
+			req, err := http.NewRequest("POST", responseURL, bytes.NewBuffer(clientMessage))
+			if err != nil {
+				log.Debug().Err(err).Msg("error creating the reply back HTTP request")
+				LogError(err)
+				return err
+			}
+			req.Header.Set("Content-Type", "application/json")
+			res, err := client.Do(req)
+			if err != nil {
+				log.Debug().Err(err).Msg("error encountered while sending the Slack answer reply back HTTP request")
+				LogError(err)
+				return err
+			}
+			defer res.Body.Close()
+			if res.StatusCode != http.StatusOK {
+				rawError, err := ioutil.ReadAll(res.Body)
+				if err != nil {
+					log.Debug().Err(err).Msg("unable to read error from the Slack answer reply back HTTP request in an error scenairo")
+					LogError(err)
+				}
+				erroString := string(rawError)
+				log.Debug().Msgf("error encountered while sending the Slack answer reply back HTTP request, status code: %d", res.StatusCode)
+				err = errors.New(erroString)
+				LogError(err)
+				return err
+			}
+			return nil
+		}, retry.Attempts(10), retry.Delay(2*time.Second), retry.LastErrorOnly(true),
 	)
 	if err != nil {
 		log.Debug().Err(err).Msg("error encountered while sending the Slack answer reply back HTTP request")
@@ -212,7 +270,41 @@ func waitMessagePayload(title, content string, isPrivate bool) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	log.Debug().Msgf("Slack Reply Payload: ", string(payloadBytes))
+	log.Debug().Msgf("Slack Reply Payload: %v", string(payloadBytes))
+
+	return payloadBytes, nil
+}
+
+func errorMessagePayload(content string, isPrivate bool) ([]byte, error) {
+
+	var responseType string
+	if isPrivate {
+		responseType = "ephemeral"
+	} else {
+		responseType = "in_channel"
+	}
+
+	payload := SlackPayload{
+		ResponseType: responseType,
+		Blocks: []SlackBlock{
+			{
+				Type: "section",
+				Text: &SlackTextObject{
+					Type: "mrkdwn",
+					Text: content,
+				},
+			},
+		},
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		log.Debug().Err(err).Msg("error marshalling the user error message payload")
+		LogError(err)
+		return []byte{}, err
+	}
+
+	log.Debug().Msgf("Slack Error Reply Payload: %v", string(payloadBytes))
 
 	return payloadBytes, nil
 }

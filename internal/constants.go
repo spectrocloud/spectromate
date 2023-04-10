@@ -10,6 +10,7 @@ const (
 	SlackDefaultUserErrorMessage  string = "An error occured with the help command. Please reach out to `#docs` for assistance."
 	MendandableNewConversationURL string = "https://api.mendable.ai/v0/newConversation"
 	MendableChatQueryURL          string = "https://api.mendable.ai/v0/mendableChat"
+	DefaultUserErrorMessage       string = `:warning: I'm sorry, I'm having technical issues. Notify the the docs team @ #docs and please try again later.`
 )
 
 // GetRandomWaitMessage returns a random wait message.
