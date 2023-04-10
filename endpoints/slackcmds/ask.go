@@ -60,6 +60,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	// Check if a conversation already exists for this user.
 	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
+		internal.LogError(err)
 		log.Debug().Err(err).Msgf("an error occured when checking for an exiting conversation: %+v", s.slackEvent)
 		globalErr = &err
 		return
@@ -122,14 +123,9 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		requestCounter = int(cNew)
 		conversationId = cID
 		questionRequestItem := internal.MendableRequestPayload{
-			ApiKey:   s.mendableAPIKey,
-			Question: userQuery,
-			History: []internal.HistoryItems{
-				{
-					Prompt:   cacheItem.Question,
-					Response: cacheItem.Answer,
-				},
-			},
+			ApiKey:         s.mendableAPIKey,
+			Question:       userQuery,
+			History:        cacheItem.History,
 			ConversationID: conversationId,
 			ShouldStream:   false,
 		}
@@ -151,7 +147,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	linksString := linksBuilderString(mendableResponse.Links)
 	markdownContent := fmt.Sprintf(`%v`, mendableResponse.Answer)
 
-	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter)
+	err = storeUserEntry(s.ctx, s, mendableResponse, cacheItem.History, requestCounter)
 	if err != nil {
 		log.Debug().Err(err).Msgf("Error storing user entry: %+v", s.slackEvent)
 		globalErr = &err
@@ -249,7 +245,7 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 // - Channel ID
 // - Conversation IDSlackCommandsIntf
 // - Timestamp
-func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.MendableQueryResponse, counter int) error {
+func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.MendableQueryResponse, previousHist []internal.HistoryItems, counter int) error {
 
 	tNow := time.Now()
 
@@ -260,7 +256,9 @@ func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.M
 		Response: response.Answer,
 	}
 
-	jsonBytes, err := json.Marshal(hst)
+	previousHist = append(previousHist, hst)
+
+	jsonBytes, err := json.Marshal(previousHist)
 	if err != nil {
 		internal.LogError(err)
 		log.Error().Err(err).Msg("error marshalling history item to JSON for cache.")
@@ -305,15 +303,18 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 	result, err := s.cache.HGetAll(ctx, primaryKey).Result()
 	if err != nil {
 		if err == redis.Nil {
+			internal.LogError(err)
 			log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
 			return true, nil, nil
 		}
+		internal.LogError(err)
 		log.Error().Err(err).Msg("Error retrieving user cache from cache.")
 		return false, nil, err
 	}
 
 	if len(result) == 0 {
 		log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
+		internal.LogError(err)
 		return true, nil, nil
 	}
 

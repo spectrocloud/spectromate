@@ -98,6 +98,7 @@ type CacheItem struct {
 	Question       string
 	Answer         string
 	Timestamp      *time.Time
+	History        []HistoryItems
 	Counter        string
 }
 
