@@ -75,14 +75,28 @@ type SlackPayload struct {
 }
 
 type SlackBlock struct {
-	Type   string            `json:"type"`
-	Fields []SlackTextObject `json:"fields,omitempty"`
-	Text   *SlackTextObject  `json:"text,omitempty"`
+	Type     string            `json:"type"`
+	Fields   []SlackTextObject `json:"fields,omitempty"`
+	Elements []SlackElements   `json:"elements,omitempty"`
+	Text     *SlackTextObject  `json:"text,omitempty"`
 }
 
 type SlackTextObject struct {
 	Type string `json:"type"`
 	Text string `json:"text"`
+}
+
+type SlackElementText struct {
+	Type  string `json:"type"`
+	Emoji bool   `json:"emoji"`
+	Text  string `json:"text"`
+}
+type SlackElements struct {
+	Type     string           `json:"type"`
+	Text     SlackElementText `json:"text"`
+	Style    string           `json:"style,omitempty"`
+	Value    string           `json:"value"`
+	ActionID string           `json:"action_id"`
 }
 
 /*

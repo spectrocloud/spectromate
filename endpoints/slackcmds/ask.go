@@ -227,6 +227,36 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 					Text: links,
 				},
 			},
+			{
+				Type: "divider",
+			},
+			{
+				Type: "actions",
+				Elements: []internal.SlackElements{
+					{
+						Type:  "button",
+						Value: "1",
+						Text: internal.SlackElementText{
+							Type:  "plain_text",
+							Emoji: true,
+							Text:  ":thumbsup:",
+						},
+						Style:    "primary",
+						ActionID: "positive_feedback",
+					},
+					{
+						Type:  "button",
+						Value: "-1",
+						Text: internal.SlackElementText{
+							Type:  "plain_text",
+							Emoji: true,
+							Text:  ":thumbsdown:",
+						},
+						Style:    "danger",
+						ActionID: "negative_feedback",
+					},
+				},
+			},
 		},
 	}
 
@@ -235,6 +265,7 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 		return []byte{}, err
 	}
 
+	log.Debug().Msgf("Slack Answer Payload: %v", string(payloadBytes))
 	return payloadBytes, nil
 }
 
