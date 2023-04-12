@@ -242,7 +242,7 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 							Text:  ":thumbsup:",
 						},
 						Style:    "primary",
-						ActionID: "positive_feedback",
+						ActionID: internal.ActionsAskModelPositiveFeedbackID,
 					},
 					{
 						Type:  "button",
@@ -253,7 +253,7 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 							Text:  ":thumbsdown:",
 						},
 						Style:    "danger",
-						ActionID: "negative_feedback",
+						ActionID: internal.ActionsAskModelNegativeFeedbackID,
 					},
 				},
 			},
@@ -368,9 +368,6 @@ func linksBuilderString(urls []string) string {
 }
 
 func errorEval(ctx context.Context, e *error, s *SlackAskRequest, isPrivate bool) {
-
-	log.Debug().Msgf("Error evaluating the answer: %v", e)
-
 	if e != nil {
 		err := internal.ReplyWithErrorMessage(s.slackEvent.ResponseURL, isPrivate)
 		if err != nil {

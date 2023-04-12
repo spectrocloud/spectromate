@@ -119,3 +119,86 @@ type CacheItem struct {
 type MendableNewConversationResponse struct {
 	ConversationID int64 `json:"conversation_id"`
 }
+
+/*
+* Slack Actions types
+
+ */
+
+type SlackActionEvent struct {
+	Type                string       `json:"type"`
+	User                SlackUser    `json:"user"`
+	ApiAppID            string       `json:"api_app_id"`
+	Token               string       `json:"token"`
+	Container           Container    `json:"container"`
+	TriggerID           string       `json:"trigger_id"`
+	Team                Team         `json:"team"`
+	Enterprise          interface{}  `json:"enterprise"`
+	IsEnterpriseInstall bool         `json:"is_enterprise_install"`
+	Channel             Channel      `json:"channel"`
+	Message             SlackMessage `json:"message"`
+	State               State        `json:"state"`
+	ResponseURL         string       `json:"response_url"`
+	Actions             []Action     `json:"actions"`
+}
+
+type SlackUser struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	TeamID   string `json:"team_id"`
+}
+
+type Container struct {
+	Type        string `json:"type"`
+	MessageTS   string `json:"message_ts"`
+	ChannelID   string `json:"channel_id"`
+	IsEphemeral bool   `json:"is_ephemeral"`
+}
+
+type Team struct {
+	ID     string `json:"id"`
+	Domain string `json:"domain"`
+}
+
+type Channel struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type SlackMessage struct {
+	Type    string              `json:"type"`
+	Subtype string              `json:"subtype"`
+	Text    string              `json:"text"`
+	Ts      string              `json:"ts"`
+	BotID   string              `json:"bot_id"`
+	Blocks  []SlackActionsBlock `json:"blocks"`
+}
+
+type SlackActionsBlock struct {
+	Type     string      `json:"type"`
+	BlockID  string      `json:"block_id"`
+	Text     ActionsText `json:"text,omitempty"`
+	Elements []Action    `json:"elements,omitempty"`
+}
+
+type ActionsText struct {
+	Type     string `json:"type"`
+	Text     string `json:"text"`
+	Emoji    bool   `json:"emoji,omitempty"`
+	Verbatim bool   `json:"verbatim,omitempty"`
+}
+
+type State struct {
+	Values map[string]interface{} `json:"values"`
+}
+
+type Action struct {
+	ActionID string      `json:"action_id"`
+	BlockID  string      `json:"block_id"`
+	Type     string      `json:"type"`
+	Text     ActionsText `json:"text,omitempty"`
+	Value    string      `json:"value,omitempty"`
+	Style    string      `json:"style,omitempty"`
+	ActionTS string      `json:"action_ts,omitempty"`
+}

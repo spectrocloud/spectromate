@@ -20,6 +20,13 @@ type SlackRoute struct {
 	cache          *redis.Client
 }
 
+type ActionsRoute struct {
+	ctx            context.Context
+	signingSecret  string
+	mendableApiKey string
+	ActionsEvent   *internal.SlackActionEvent
+}
+
 type SlackCommands int
 
 const (

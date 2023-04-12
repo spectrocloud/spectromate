@@ -127,7 +127,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 		mendableResponse.Answer = DefaultNotFoundResponse
 	}
 
-	log.Debug().Msgf("Mendable Question response: %v", mendableResponse)
+	log.Debug().Msgf("Mendable Question response: %v", mendableResponse.Answer)
 
 	return mendableResponse, nil
 

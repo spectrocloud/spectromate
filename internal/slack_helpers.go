@@ -78,15 +78,51 @@ func DecodeForm(values url.Values, dst interface{}) error {
 		case reflect.Bool:
 			boolValue, err := strconv.ParseBool(fieldValue[0])
 			if err != nil {
+				LogError(err)
 				return err
 			}
 			field.SetBool(boolValue)
 		// Add cases for other types as needed.
 		default:
-			return fmt.Errorf("unsupported field type %s", field.Type().Kind())
+			err := fmt.Errorf("unsupported field type %s", field.Type().Kind())
+			LogError(err)
+			return err
 		}
 	}
 	return nil
+}
+
+func DecodeSlackActionEventForm(payload string) (SlackActionEvent, error) {
+	var event SlackActionEvent
+	err := json.Unmarshal([]byte(payload), &event)
+	if err != nil {
+		LogError(err)
+		log.Debug().Err(err).Msg("error encountered while decoding the Slack action event form data")
+		return event, err
+	}
+	return event, err
+}
+
+// getSlackEvent parses the request and returns a SlackEvent from the request.
+func GetSlackActionsEvent(request *http.Request) (SlackActionEvent, error) {
+	var actionsEvent SlackActionEvent
+
+	err := request.ParseForm()
+	if err != nil {
+		LogError(err)
+		log.Fatal().Err(err).Msg("Error parsing form.")
+	}
+
+	payload := request.PostFormValue("payload")
+
+	actionsEvent, err = DecodeSlackActionEventForm(payload)
+	if err != nil {
+		LogError(err)
+		log.Debug().Err(err).Msg("error encountered while decoding the Slack action event form data")
+		return actionsEvent, err
+	}
+
+	return actionsEvent, nil
 }
 
 // getSlackEvent parses the request and returns a SlackEvent from the request.
@@ -95,11 +131,14 @@ func GetSlackEvent(request *http.Request) (SlackEvent, error) {
 
 	err := request.ParseForm()
 	if err != nil {
+		LogError(err)
 		log.Fatal().Err(err).Msg("Error parsing form.")
 	}
+
 	decoder := schema.NewDecoder()
 	err = decoder.Decode(&event, request.PostForm)
 	if err != nil {
+		LogError(err)
 		log.Fatal().Err(err).Msg("Error decoding form.")
 	}
 
@@ -270,8 +309,6 @@ func waitMessagePayload(title, content string, isPrivate bool) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	log.Debug().Msgf("Slack Reply Payload: %v", string(payloadBytes))
-
 	return payloadBytes, nil
 }
 
@@ -303,8 +340,6 @@ func errorMessagePayload(content string, isPrivate bool) ([]byte, error) {
 		LogError(err)
 		return []byte{}, err
 	}
-
-	log.Debug().Msgf("Slack Error Reply Payload: %v", string(payloadBytes))
 
 	return payloadBytes, nil
 }

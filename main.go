@@ -83,9 +83,11 @@ func main() {
 	rdb := globalRedisClient
 	healthRoute := endpoints.NewHealthHandlerContext(ctx)
 	slackRoute := endpoints.NewHelpHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, rdb)
+	slackActionsRoute := endpoints.NewActionsHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey)
 
 	http.HandleFunc(internal.ApiPrefixV1+"health", healthRoute.HealthHTTPHandler)
 	http.HandleFunc(internal.ApiPrefixV1+"slack", slackRoute.SlackHTTPHandler)
+	http.HandleFunc(internal.ApiPrefixV1+"slack/actions", slackActionsRoute.ActionsHTTPHandler)
 
 	log.Info().Msgf("Server is configured for port %s and listing on %s", globalPort, globalHostURL)
 	log.Info().Msgf("Redis is configured for %s:%d", globalRedisURL, globalRedisPort)
