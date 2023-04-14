@@ -148,13 +148,13 @@ func GetSlackEvent(request *http.Request) (SlackEvent, error) {
 // replyStatus200 replies to the Slack event with a 200 status.
 // This is required to prevent Slack from considering the request a failure.
 // Slack requires a response within 3 seconds.
-func ReplyStatus200(responseURL string, writer http.ResponseWriter, isPrivate bool) error {
+func ReplyStatus200(responseURL string, writer http.ResponseWriter, isPrivate bool) ([]byte, error) {
 
 	if responseURL == "" {
 		err := errors.New("response URL is empty")
 		log.Debug().Err(err).Msg("error encountered while sending the Slack 200 OK reply back HTTP request")
 		LogError(err)
-		return err
+		return []byte{}, err
 	}
 
 	markdownContent := GetRandomWaitMessage()
@@ -164,14 +164,8 @@ func ReplyStatus200(responseURL string, writer http.ResponseWriter, isPrivate bo
 		log.Error().Err(err).Msg("Error creating Slack 200 markdown payload.")
 	}
 
-	_, err = writer.Write(returnValue)
-	if err != nil {
-		LogError(err)
-		log.Error().Err(err).Msg("Error writing 200 OK Wait Reply.")
-	}
-
 	log.Debug().Msg("Successfully replied to Slack with status 200.")
-	return nil
+	return returnValue, nil
 }
 
 // replyWithAnswer replies to the Slack event using the response URL provided.

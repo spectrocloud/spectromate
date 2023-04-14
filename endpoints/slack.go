@@ -67,7 +67,7 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 	// Get the command from the Slack event.
 	userCmd := strings.Split(slack.SlackEvent.Text, " ")[0]
 	// Convert the command to a SlackCommands type.
-	cmd, err := determineCommnad(userCmd)
+	cmd, err := determineCommand(userCmd)
 	if err != nil {
 		log.Debug().Msg("Error converting string to SlackCommands type.")
 	}
@@ -81,19 +81,20 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			return nil, err
 		}
 	case Ask:
-		// slackRequestInfo := slackcmds.NewSlackAskRequest(
-		// 	slack.ctx,
-		// 	slack.SlackEvent,
-		// 	slack.mendableApiKey,
-		// 	slack.cache,
-		// )
+		slackRequestInfo := slackcmds.NewSlackAskRequest(
+			slack.ctx,
+			slack.SlackEvent,
+			slack.mendableApiKey,
+			slack.cache,
+		)
 
-		err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, false)
+		reply200Payload, err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, false)
 		if err != nil {
 			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
 			return nil, err
 		}
-		// go slackcmds.AskCmd(slackRequestInfo, false)
+		returnPayload = reply200Payload
+		go slackcmds.AskCmd(slackRequestInfo, false)
 	case PAsk:
 		slackRequestInfo := slackcmds.NewSlackAskRequest(
 			slack.ctx,
@@ -101,11 +102,12 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			slack.mendableApiKey,
 			slack.cache,
 		)
-		err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, true)
+		reply200Payload, err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, true)
 		if err != nil {
 			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
 			return nil, err
 		}
+		returnPayload = reply200Payload
 		go slackcmds.AskCmd(slackRequestInfo, true)
 	default:
 		returnPayload, err = slackcmds.HelpCmd()
@@ -118,9 +120,9 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 	return returnPayload, err
 }
 
-// determineCommnad converts a string to a SlackCommands type.
+// determineCommand converts a string to a SlackCommands type.
 // An error is returned if the string does not match a SlackCommands type.
-func determineCommnad(input string) (SlackCommands, error) {
+func determineCommand(input string) (SlackCommands, error) {
 
 	cmd, err := SlackCommandsFromString(input)
 	if err != nil {
