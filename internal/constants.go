@@ -19,8 +19,8 @@ const (
 	ActionsAskModelPositiveFeedbackID string        = "ask_model_positive_feedback"
 	ActionsAskModelNegativeFeedbackID string        = "ask_model_negative_feedback"
 	DefaultCacheExpirationPeriod      time.Duration = 15 * time.Minute
-	DefaultPositiveRatingMessage      string        = `Thank you for your providing the :thumbsup: feedback!`
-	DefaultNegativeRatingMessage      string        = `Thank you for your providing the :thumbsdown: feedback!`
+	DefaultPositiveRatingMessage      string        = `Thank you for providing the :thumbsup: feedback!`
+	DefaultNegativeRatingMessage      string        = `Thank you for providing the :thumbsdown: feedback!`
 )
 
 // GetRandomWaitMessage returns a random wait message.
