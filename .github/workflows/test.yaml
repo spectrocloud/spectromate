@@ -103,7 +103,7 @@ jobs:
         ./spectromate version
 
   Docker:
-    needs: [run-ci,linting,compile]
+    needs: [run-ci,linting,test,compile]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout

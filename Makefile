@@ -9,3 +9,8 @@ stop:
 	@echo "Stopping the application and ngrok"
 	docker compose down
 	pkill ngrok
+
+server:
+	@echo "Starting the server..."
+	go run main.go
+	

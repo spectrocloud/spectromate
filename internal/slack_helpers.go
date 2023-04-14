@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -198,7 +197,7 @@ func ReplyWithAnswer(responseURL string, payload []byte, isPrivate bool) error {
 			}
 			defer res.Body.Close()
 			if res.StatusCode != http.StatusOK {
-				rawError, err := ioutil.ReadAll(res.Body)
+				rawError, err := io.ReadAll(res.Body)
 				if err != nil {
 					log.Debug().Err(err).Msg("unable to read error from the Slack answer reply back HTTP request in an error scenairo")
 					LogError(err)
@@ -256,7 +255,7 @@ func ReplyWithErrorMessage(responseURL string, isPrivate bool) error {
 			}
 			defer res.Body.Close()
 			if res.StatusCode != http.StatusOK {
-				rawError, err := ioutil.ReadAll(res.Body)
+				rawError, err := io.ReadAll(res.Body)
 				if err != nil {
 					log.Debug().Err(err).Msg("unable to read error from the Slack answer reply back HTTP request in an error scenairo")
 					LogError(err)
