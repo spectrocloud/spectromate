@@ -90,9 +90,8 @@ jobs:
   
     - name: build & execute
       run: |
-        echo "--------------------------------------------------"
+        make start
         go build -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=1.0.0'" -o=spectromate -v
-        ./spectromate version
 
   Docker:
     needs: [run-ci,linting,test,compile]
