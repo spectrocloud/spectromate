@@ -42,6 +42,7 @@ type MendableSources struct {
 
 type MendableQueryResponse struct {
 	ConversationID int64
+	MessageID      string
 	Question       string
 	Answer         string
 	Links          []string

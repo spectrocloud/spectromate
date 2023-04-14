@@ -164,8 +164,6 @@ func ReplyStatus200(responseURL string, writer http.ResponseWriter, isPrivate bo
 		log.Error().Err(err).Msg("Error creating Slack 200 markdown payload.")
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusOK)
 	_, err = writer.Write(returnValue)
 	if err != nil {
 		LogError(err)

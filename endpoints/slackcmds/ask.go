@@ -160,7 +160,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 
 	q := fmt.Sprintf(`:question: %v`, mendableResponse.Question)
 
-	slackReplyPayload, err := askMarkdownPayload(markdownContent, q, linksString, "Docs Answer", isPrivate)
+	slackReplyPayload, err := askMarkdownPayload(markdownContent, q, linksString, "Docs Answer", mendableResponse.MessageID, isPrivate)
 	if err != nil {
 		log.Info().Err(err).Msg("Error creating markdown payload.")
 		globalErr = &err
@@ -177,7 +177,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 }
 
 // // createMarkdownPayload creates a Slack payload with a markdown block
-func askMarkdownPayload(content, question, links, title string, isPrivate bool) ([]byte, error) {
+func askMarkdownPayload(content, question, links, title, messageId string, isPrivate bool) ([]byte, error) {
 	log.Info().Msgf("Incoming Message: %v", content)
 
 	var responseType string
@@ -231,11 +231,20 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 				Type: "divider",
 			},
 			{
+				Type: "section",
+				Fields: []internal.SlackTextObject{
+					{
+						Type: "mrkdwn",
+						Text: "*Rate Answer:*",
+					},
+				},
+			},
+			{
 				Type: "actions",
 				Elements: []internal.SlackElements{
 					{
 						Type:  "button",
-						Value: "1",
+						Value: messageId,
 						Text: internal.SlackElementText{
 							Type:  "plain_text",
 							Emoji: true,
@@ -246,7 +255,7 @@ func askMarkdownPayload(content, question, links, title string, isPrivate bool) 
 					},
 					{
 						Type:  "button",
-						Value: "-1",
+						Value: messageId,
 						Text: internal.SlackElementText{
 							Type:  "plain_text",
 							Emoji: true,
@@ -301,7 +310,7 @@ func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.M
 	}
 	log.Debug().Msgf("Stored user entry in cache: %v", cacheItem)
 	// Set the expiration on the key.
-	err = s.cache.Expire(ctx, primaryKey, time.Minute*5).Err()
+	err = s.cache.Expire(ctx, primaryKey, internal.DefaultCacheExpirationPeriod).Err()
 	if err != nil {
 		log.Error().Err(err).Msg("Error setting expiration on cache key.Exiting program.")
 		panic(err)

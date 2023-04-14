@@ -34,7 +34,6 @@ func (actions *ActionsRoute) ActionsHTTPHandler(writer http.ResponseWriter, requ
 
 	// Set the slack event in the SlackRoute struct so it can be used by the other handlers.
 	actions.ActionsEvent = &event
-
 	log.Debug().Msgf("Slack event: %+v", event)
 
 	value, err := actions.getHandler(request)

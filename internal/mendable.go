@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -117,6 +118,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 
 	mendableResponse = MendableQueryResponse{
 		ConversationID: int64(query.ConversationID),
+		MessageID:      fmt.Sprint(result.MessageID),
 		Question:       query.Question,
 		Answer:         result.Answer.Text,
 		Links:          uniqueLinks,
