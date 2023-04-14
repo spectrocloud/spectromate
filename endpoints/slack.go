@@ -81,19 +81,19 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			return nil, err
 		}
 	case Ask:
-		slackRequestInfo := slackcmds.NewSlackAskRequest(
-			slack.ctx,
-			slack.SlackEvent,
-			slack.mendableApiKey,
-			slack.cache,
-		)
+		// slackRequestInfo := slackcmds.NewSlackAskRequest(
+		// 	slack.ctx,
+		// 	slack.SlackEvent,
+		// 	slack.mendableApiKey,
+		// 	slack.cache,
+		// )
 
 		err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, false)
 		if err != nil {
 			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
 			return nil, err
 		}
-		go slackcmds.AskCmd(slackRequestInfo, false)
+		// go slackcmds.AskCmd(slackRequestInfo, false)
 	case PAsk:
 		slackRequestInfo := slackcmds.NewSlackAskRequest(
 			slack.ctx,
