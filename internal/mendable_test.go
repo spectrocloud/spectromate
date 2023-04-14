@@ -44,7 +44,10 @@ func TestCreateNewConversation(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(jsonBody)
+		_, err = w.Write(jsonBody)
+		if err != nil {
+			t.Errorf("Error writing response body: %v", err)
+		}
 	}))
 	defer ts.Close()
 
@@ -88,7 +91,10 @@ func TestSendDocsQuery(t *testing.T) {
 			},
 		}
 		response.Answer.Text = "This is a test answer."
-		json.NewEncoder(w).Encode(response)
+		err := json.NewEncoder(w).Encode(response)
+		if err != nil {
+			t.Errorf("Error encoding response body: %v", err)
+		}
 	}))
 	defer ts.Close()
 

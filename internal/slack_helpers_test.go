@@ -3,7 +3,7 @@ package internal
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"testing"
@@ -107,7 +107,7 @@ func TestGetSlackEvent(t *testing.T) {
 
 	// Create a fake HTTP request with form data
 	requestBody := bytes.NewBufferString(formData.Encode())
-	request, err := http.NewRequest("POST", "/slack", ioutil.NopCloser(requestBody))
+	request, err := http.NewRequest("POST", "/slack", io.NopCloser(requestBody))
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
