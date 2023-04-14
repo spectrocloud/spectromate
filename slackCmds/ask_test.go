@@ -1,4 +1,4 @@
-package slackcmds
+package slackCmds
 
 import (
 	"strings"

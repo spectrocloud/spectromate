@@ -58,6 +58,58 @@ func CreateNewConversation(ctx context.Context, apiKey, apiURL string) (int64, e
 	return responseBody.ConversationID, nil
 }
 
+// SendModelRating sends the model rating to Mendable.
+func SendModelRating(ctx context.Context, messageID int, rateScore MendableRatingScore, apiKey, apiURL string) error {
+
+	requestBody := MendableModelRatingFeedback{
+		ApiKey:    apiKey,
+		MessageID: messageID,
+		Rating:    rateScore,
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		log.Debug().Err(err).Msg("Error marshaling the model rating body")
+		return err
+	}
+
+	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		log.Debug().Err(err).Msg("error creating the model rating request")
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Debug().Err(err).Msg("an error occured during the HTTP request")
+		LogError(err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Debug().Err(err).Msg("error reading model rating response body")
+		LogError(err)
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		log.Debug().Msgf("error while sending model rating: %s", responseBody)
+		log.Debug().Msgf("status code: %d", resp.StatusCode)
+		return fmt.Errorf("error while sending model rating: %s", responseBody)
+	}
+
+	return nil
+
+}
+
 // sendDocsQuery sends a query to Mendable and returns the response.
 func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL string) (MendableQueryResponse, error) {
 

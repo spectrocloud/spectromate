@@ -11,6 +11,19 @@ type MendableAPIRequest struct {
 	ApiKey string `json:"api_key"`
 }
 
+type MendableModelRatingFeedback struct {
+	ApiKey    string              `json:"api_key"`
+	MessageID int                 `json:"message_id"`
+	Rating    MendableRatingScore `json:"rating_value"`
+}
+
+type MendableRatingScore int8
+
+const (
+	PositiveFeedbackScore MendableRatingScore = 1
+	NegativeFeedbackScore MendableRatingScore = -1
+)
+
 type MendableRequestPayload struct {
 	ApiKey         string         `json:"api_key"`
 	Question       string         `json:"question"`

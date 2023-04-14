@@ -7,8 +7,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
-	"spectrocloud.com/docs-slack-bot/endpoints/slackcmds"
 	"spectrocloud.com/docs-slack-bot/internal"
+	"spectrocloud.com/docs-slack-bot/slackCmds"
 )
 
 // NewHandlerContext returns a new CounterRoute with a database connection.
@@ -74,14 +74,14 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 
 	switch cmd {
 	case Help:
-		returnPayload, err = slackcmds.HelpCmd()
+		returnPayload, err = slackCmds.HelpCmd()
 		if err != nil {
 			internal.LogError(err)
 			log.Info().Err(err).Msg(internal.SlackDefaultUserErrorMessage)
 			return nil, err
 		}
 	case Ask:
-		slackRequestInfo := slackcmds.NewSlackAskRequest(
+		slackRequestInfo := slackCmds.NewSlackAskRequest(
 			slack.ctx,
 			slack.SlackEvent,
 			slack.mendableApiKey,
@@ -94,9 +94,9 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			return nil, err
 		}
 		returnPayload = reply200Payload
-		go slackcmds.AskCmd(slackRequestInfo, false)
+		go slackCmds.AskCmd(slackRequestInfo, false)
 	case PAsk:
-		slackRequestInfo := slackcmds.NewSlackAskRequest(
+		slackRequestInfo := slackCmds.NewSlackAskRequest(
 			slack.ctx,
 			slack.SlackEvent,
 			slack.mendableApiKey,
@@ -108,9 +108,9 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			return nil, err
 		}
 		returnPayload = reply200Payload
-		go slackcmds.AskCmd(slackRequestInfo, true)
+		go slackCmds.AskCmd(slackRequestInfo, true)
 	default:
-		returnPayload, err = slackcmds.HelpCmd()
+		returnPayload, err = slackCmds.HelpCmd()
 		if err != nil {
 			log.Info().Err(err).Msg(internal.SlackDefaultUserErrorMessage)
 			return nil, err
