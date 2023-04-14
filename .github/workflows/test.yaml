@@ -99,7 +99,7 @@ jobs:
     - name: build & execute
       run: |
         echo "--------------------------------------------------"
-        go build -ldflags="-X 'spectrocloud.com/docs-slack-bot/cmd.VersionString=1.0.0'" -o=spectromate -v
+        go build -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=1.0.0'" -o=spectromate -v
         ./spectromate version
 
   Docker:
