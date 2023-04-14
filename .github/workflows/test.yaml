@@ -8,6 +8,8 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
+  MENDABLE_API_KEY: ${{secrets.MENDABLE_API_KEY}}
+  SLACK_SIGNING_SECRET: ${{secrets.SLACK_SIGNING_SECRET}}
 
 
 concurrency:
@@ -61,16 +63,6 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
 
-    -
-      name: "Get dependencies"
-      id: dependencies
-      run: |
-          go get -v -t -d ./...
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
-  
     - name: Go Tests
       run: |
         go test ./...
