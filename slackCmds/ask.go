@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	"spectrocloud.com/spectromate/internal"
@@ -16,15 +15,9 @@ type SlackAskRequest struct {
 	ctx            context.Context
 	slackEvent     *internal.SlackEvent
 	mendableAPIKey string
-	// cache          *redis.Client
-	cache internal.Cache
+	cache          internal.Cache
 }
 
-// NewSlackAskRequest returns a new SlackAskRequest.
-//
-//	func NewSlackAskRequest(ctx context.Context, slackEvent *internal.SlackEvent, mendableAPIKey string, cache *redis.Client) *SlackAskRequest {
-//		return &SlackAskRequest{ctx, slackEvent, mendableAPIKey, cache}
-//	}
 func NewSlackAskRequest(ctx context.Context, slackEvent *internal.SlackEvent, mendableAPIKey string, cache internal.Cache) *SlackAskRequest {
 	return &SlackAskRequest{ctx, slackEvent, mendableAPIKey, cache}
 }
@@ -127,14 +120,9 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 		requestCounter = int(cNew)
 		conversationId = cID
 		questionRequestItem := internal.MendableRequestPayload{
-			ApiKey:   s.mendableAPIKey,
-			Question: userQuery,
-			History: []internal.HistoryItems{
-				{
-					Prompt:   cacheItem.Question,
-					Response: cacheItem.Answer,
-				},
-			},
+			ApiKey:         s.mendableAPIKey,
+			Question:       userQuery,
+			History:        cacheItem.History,
 			ConversationID: conversationId,
 			ShouldStream:   false,
 		}
@@ -156,7 +144,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	linksString := linksBuilderString(mendableResponse.Links)
 	markdownContent := fmt.Sprintf(`%v`, mendableResponse.Answer)
 
-	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter)
+	err = storeUserEntry(s.ctx, s, mendableResponse, requestCounter, cacheItem)
 	if err != nil {
 		log.Debug().Err(err).Msgf("Error storing user entry: %+v", s.slackEvent)
 		globalErr = &err
@@ -292,11 +280,32 @@ func askMarkdownPayload(content, question, links, title, messageId string, isPri
 // - Channel ID
 // - Conversation IDSlackCommandsIntf
 // - Timestamp
-func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.MendableQueryResponse, counter int) error {
-
-	tNow := time.Now()
+func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.MendableQueryResponse, counter int, previousCacheItem *internal.CacheItem) error {
 
 	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.slackEvent.UserID, s.slackEvent.ChannelID)
+
+	if previousCacheItem == nil {
+		log.Debug().Msg("Previous cache item is nil.")
+		previousCacheItem = &internal.CacheItem{}
+	}
+
+	previousHistory := previousCacheItem.History
+
+	newHistItem := []internal.HistoryItems{
+		{
+			Prompt:   response.Question,
+			Response: response.Answer,
+		},
+	}
+
+	newHistory := append(previousHistory, newHistItem...)
+
+	// convert newHistory to a string
+	newHistoryString, err := json.Marshal(newHistory)
+	if err != nil {
+		log.Error().Err(err).Msg("Error marshalling new history.")
+		return err
+	}
 
 	cacheItem := map[string]interface{}{
 		"UserID":         s.slackEvent.UserID,
@@ -304,17 +313,17 @@ func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.M
 		"ConversationID": response.ConversationID,
 		"Question":       response.Question,
 		"Answer":         response.Answer,
-		"Timestamp":      &tNow,
+		"History":        newHistoryString,
 		"Counter":        counter,
 	}
 
-	err := s.cache.StoreHashMap(ctx, primaryKey, cacheItem)
+	err = s.cache.StoreHashMap(ctx, primaryKey, cacheItem)
 	if err != nil {
 		log.Error().Err(err).Msg("Error storing user entry in cache.")
 		return err
 	}
 
-	log.Debug().Msgf("Stored user entry in cache: %v", cacheItem)
+	// log.Debug().Msgf("Stored user entry in cache: %v", cacheItem)
 
 	err = s.cache.ExpireKey(ctx, primaryKey, internal.DefaultCacheExpirationPeriod)
 	if err != nil {
@@ -351,15 +360,12 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 		Counter:        result["Counter"],
 	}
 
-	if timestamp, ok := result["Timestamp"]; ok {
-		if t, err := strconv.ParseInt(timestamp, 10, 64); err == nil {
-			tNow := time.Unix(t, 0)
-			cacheItem.Timestamp = &tNow
+	if history, ok := result["History"]; ok {
+		if err := json.Unmarshal([]byte(history), &cacheItem.History); err != nil {
+			log.Error().Err(err).Msg("Error unmarshalling history.")
 		}
 	}
-
-	log.Debug().Msgf("Retrieved user cache from cache: %v", cacheItem)
-
+	// log.Debug().Msgf("Retrieved user cache from cache: %v", cacheItem)
 	return true, cacheItem, nil
 }
 

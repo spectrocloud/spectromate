@@ -15,9 +15,8 @@ import (
 )
 
 var (
-	globalRedisPort int64
-	globalRedisURL  string
-	// globalRedisClient    *redis.Client
+	globalRedisPort      int64
+	globalRedisURL       string
 	globalRedisClient    internal.Cache
 	globalRedisPassword  string
 	globalRedisUser      string
@@ -88,7 +87,6 @@ func main() {
 	log.Info().Msgf("Server is configured for port %s and listing on %s", globalPort, globalHostURL)
 	log.Info().Msgf("Redis is configured for %s:%d", globalRedisURL, globalRedisPort)
 	log.Info().Msgf("Trace level set to: %s", globalTraceLevel)
-	// log.Info().Msgf("Authorization is set to: %v", globalAuthorization)
 	log.Info().Msg("Starting server...")
 	err := http.ListenAndServe(globalHostURL, nil)
 	if err != nil {

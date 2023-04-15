@@ -1,9 +1,5 @@
 package internal
 
-import (
-	"time"
-)
-
 /*
  * Mendable API types
  */
@@ -125,7 +121,6 @@ type CacheItem struct {
 	ConversationID string
 	Question       string
 	Answer         string
-	Timestamp      *time.Time
 	History        []HistoryItems
 	Counter        string
 }

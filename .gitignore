@@ -26,3 +26,4 @@ node_modules/
 *.tfstate.backup
 spectromate
 backend.tf
+redis/
