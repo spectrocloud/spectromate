@@ -13,4 +13,11 @@ stop:
 server:
 	@echo "Starting the server..."
 	go run main.go
+
+
+make init: 
+	@echo "Installing dependencies..."
+	go mod download
+	go install github.com/golang/mock/mockgen@v1.6.0
+	~/go/bin/mockgen -source=internal/cache.go -destination=mock/mock_cache.go -package=mock
 	

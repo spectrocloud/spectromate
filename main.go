@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 
 	_ "go.uber.org/automaxprocs"
@@ -16,9 +15,10 @@ import (
 )
 
 var (
-	globalRedisPort      int64
-	globalRedisURL       string
-	globalRedisClient    *redis.Client
+	globalRedisPort int64
+	globalRedisURL  string
+	// globalRedisClient    *redis.Client
+	globalRedisClient    internal.Cache
 	globalRedisPassword  string
 	globalRedisUser      string
 	globalRedisTLS       bool
@@ -61,16 +61,12 @@ func init() {
 			MinVersion: tls.VersionTLS12,
 		}
 	}
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr:      reditConnectionString,
-		Password:  globalRedisPassword,
-		DB:        0,
-		Username:  globalRedisUser,
-		TLSConfig: tlsConfig,
-	})
+	rdb := internal.NewCache(reditConnectionString,
+		globalRedisUser,
+		globalRedisPassword,
+		tlsConfig)
 	log.Debug().Msg("Checking database connection...")
-	_, err := rdb.Ping(context.Background()).Result()
+	err := rdb.Ping()
 	if err != nil {
 		log.Debug().Msg("Redis is not available")
 		log.Fatal().Err(err).Msg("Error connecting to redis")
@@ -82,7 +78,7 @@ func main() {
 	ctx := context.Background()
 	rdb := globalRedisClient
 	healthRoute := endpoints.NewHealthHandlerContext(ctx)
-	slackRoute := endpoints.NewHelpHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, rdb)
+	slackRoute := endpoints.NewSlackHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, rdb)
 	slackActionsRoute := endpoints.NewActionsHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey)
 
 	http.HandleFunc(internal.ApiPrefixV1+"health", healthRoute.HealthHTTPHandler)

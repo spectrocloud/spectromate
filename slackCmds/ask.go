@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 	"spectrocloud.com/spectromate/internal"
 )
@@ -17,11 +16,16 @@ type SlackAskRequest struct {
 	ctx            context.Context
 	slackEvent     *internal.SlackEvent
 	mendableAPIKey string
-	cache          *redis.Client
+	// cache          *redis.Client
+	cache internal.Cache
 }
 
 // NewSlackAskRequest returns a new SlackAskRequest.
-func NewSlackAskRequest(ctx context.Context, slackEvent *internal.SlackEvent, mendableAPIKey string, cache *redis.Client) *SlackAskRequest {
+//
+//	func NewSlackAskRequest(ctx context.Context, slackEvent *internal.SlackEvent, mendableAPIKey string, cache *redis.Client) *SlackAskRequest {
+//		return &SlackAskRequest{ctx, slackEvent, mendableAPIKey, cache}
+//	}
+func NewSlackAskRequest(ctx context.Context, slackEvent *internal.SlackEvent, mendableAPIKey string, cache internal.Cache) *SlackAskRequest {
 	return &SlackAskRequest{ctx, slackEvent, mendableAPIKey, cache}
 }
 
@@ -59,7 +63,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 	log.Debug().Msgf("User query: %v", userQuery)
 
 	// Check if a conversation already exists for this user.
-	isNewConversation, cacheItem, err := getUserCache(s.ctx, s)
+	isExistingConversation, cacheItem, err := getUserCache(s.ctx, s)
 	if err != nil {
 		log.Debug().Err(err).Msgf("an error occured when checking for an exiting conversation: %+v", s.slackEvent)
 		globalErr = &err
@@ -68,8 +72,8 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 
 	// This catches any errors that may occur and returns an error message to the user.
 
-	switch isNewConversation {
-	case true:
+	switch isExistingConversation {
+	case false:
 		// Create a new conversation.
 		log.Debug().Msgf("Creating a new conversation for user: %v", s.slackEvent.UserID)
 		id, err := internal.CreateNewConversation(s.ctx, s.mendableAPIKey, internal.MendandableNewConversationURL)
@@ -304,41 +308,38 @@ func storeUserEntry(ctx context.Context, s *SlackAskRequest, response internal.M
 		"Counter":        counter,
 	}
 
-	err := s.cache.HSet(ctx, primaryKey, cacheItem).Err()
+	err := s.cache.StoreHashMap(ctx, primaryKey, cacheItem)
 	if err != nil {
 		log.Error().Err(err).Msg("Error storing user entry in cache.")
 		return err
 	}
+
 	log.Debug().Msgf("Stored user entry in cache: %v", cacheItem)
-	// Set the expiration on the key.
-	err = s.cache.Expire(ctx, primaryKey, internal.DefaultCacheExpirationPeriod).Err()
+
+	err = s.cache.ExpireKey(ctx, primaryKey, internal.DefaultCacheExpirationPeriod)
 	if err != nil {
-		log.Error().Err(err).Msg("Error setting expiration on cache key.Exiting program.")
-		panic(err)
+		log.Error().Err(err).Msg("Error setting expiration on user entry in cache.")
+		return err
 	}
 
 	return err
 }
 
 // getUserCache retrieves the entire cache item from the cache.
-// If the cache item is not found, it returns false and a nil cache item.
+// If the cache item is not found, it returns true and a nil cache item.
 // If an error occurs, it returns false and the error.
 func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.CacheItem, error) {
 	primaryKey := fmt.Sprintf("docs_bot:user_id:channel_id:%s:%s", s.slackEvent.UserID, s.slackEvent.ChannelID)
 
-	result, err := s.cache.HGetAll(ctx, primaryKey).Result()
+	ok, result, err := s.cache.GetHashMap(ctx, primaryKey)
 	if err != nil {
-		if err == redis.Nil {
-			log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
-			return true, nil, nil
-		}
 		log.Error().Err(err).Msg("Error retrieving user cache from cache.")
 		return false, nil, err
 	}
 
-	if len(result) == 0 {
+	if !ok {
 		log.Debug().Msgf("User cache not found in cache: %s", primaryKey)
-		return true, nil, nil
+		return false, nil, nil
 	}
 
 	cacheItem := &internal.CacheItem{
@@ -359,7 +360,7 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 
 	log.Debug().Msgf("Retrieved user cache from cache: %v", cacheItem)
 
-	return false, cacheItem, nil
+	return true, cacheItem, nil
 }
 
 // linksBuilderString builds a string of links.

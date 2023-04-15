@@ -6,15 +6,18 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 	"spectrocloud.com/spectromate/internal"
 	"spectrocloud.com/spectromate/slackCmds"
 )
 
 // NewHandlerContext returns a new CounterRoute with a database connection.
-func NewHelpHandlerContext(ctx context.Context, signingSecret, mendableApiKey string, r *redis.Client) *SlackRoute {
-	return &SlackRoute{ctx, signingSecret, mendableApiKey, &internal.SlackEvent{}, r}
+// func NewSlackHandlerContext(ctx context.Context, signingSecret, mendableApiKey string, r *redis.Client) *SlackRoute {
+// 	return &SlackRoute{ctx, signingSecret, mendableApiKey, &internal.SlackEvent{}, r}
+// }
+
+func NewSlackHandlerContext(ctx context.Context, signingSecret, mendableApiKey string, c internal.Cache) *SlackRoute {
+	return &SlackRoute{ctx, signingSecret, mendableApiKey, &internal.SlackEvent{}, c}
 }
 
 func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *http.Request) {

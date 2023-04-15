@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/redis/go-redis/v9"
 	"spectrocloud.com/spectromate/internal"
 )
 
@@ -17,7 +16,8 @@ type SlackRoute struct {
 	signingSecret  string
 	mendableApiKey string
 	SlackEvent     *internal.SlackEvent
-	cache          *redis.Client
+	// cache          *redis.Client
+	cache internal.Cache
 }
 
 type ActionsRoute struct {
@@ -61,35 +61,4 @@ func SlackCommandsFromString(s string) (SlackCommands, error) {
 	default:
 		return -1, fmt.Errorf("unknown command: %s", s)
 	}
-}
-
-// SlackCommandsIntf is an interface for the SlackCommands type.
-// This is used to pass the SlackRoute struct to the SlackCommands functions.
-// And avoid circular dependencies.
-type SlackCommandsIntf interface {
-	GetContext() context.Context
-	GetSigningSecret() string
-	GetMendableAPIKey() string
-	GetSlackEvent() *internal.SlackEvent
-	GetCache() *redis.Client
-}
-
-func (sr *SlackRoute) GetContext() context.Context {
-	return sr.ctx
-}
-
-func (sr *SlackRoute) GetSigningSecret() string {
-	return sr.signingSecret
-}
-
-func (sr *SlackRoute) GetMendableAPIKey() string {
-	return sr.mendableApiKey
-}
-
-func (sr *SlackRoute) GetSlackEvent() *internal.SlackEvent {
-	return sr.SlackEvent
-}
-
-func (sr *SlackRoute) GetCache() *redis.Client {
-	return sr.cache
 }
