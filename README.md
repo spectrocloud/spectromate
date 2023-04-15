@@ -35,7 +35,7 @@ The following endpoints are available.
 
 ## Slack Commands 🛠️
 
-The following endpoints are available.
+The following Slack commands are available.
 
 | Description                                               | Command           |
 | ----------------------------------------------------------|-------------------|
@@ -65,7 +65,7 @@ The following is an architectural overview of SpectroMate.
 
 |Action| Supported | Notes |
 |---|---|---|
-| Slash command| ✅ || Supported through the `/slack` endpoint.|
+| Slash command| ✅ | Supported through the `/slack` endpoint.|
 | Message buttons | ✅| Supported through the `/slack/actions` endpoint.|
 | Mentions | ❌ | Currently unavailable. |
 | Health checks | ✅ | Supported through the `/health` endpoint.|
