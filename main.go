@@ -20,7 +20,7 @@ var (
 	globalRedisClient    internal.Cache
 	globalRedisPassword  string
 	globalRedisUser      string
-	globalRedisTLS       bool
+	globalRedisTLS       string
 	globalTraceLevel     string
 	globalHost           string
 	globalPort           string
@@ -34,6 +34,8 @@ func init() {
 	internal.InitLogger(globalTraceLevel)
 	globalSigningSecret = internal.Getenv("SLACK_SIGNING_SECRET", "")
 	globalMendableAPIKey = internal.Getenv("MENDABLE_API_KEY", "")
+	globalRedisTLS = strings.ToLower(internal.Getenv("REDIS_TLS", "false"))
+	redisTLS := globalRedisTLS
 	port := internal.Getenv("PORT", "3000")
 	host := internal.Getenv("HOST", "0.0.0.0")
 	globalHost = host
@@ -55,11 +57,12 @@ func init() {
 
 	var tlsConfig *tls.Config
 
-	if globalRedisTLS {
+	if redisTLS == "true" {
 		tlsConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
 		}
 	}
+
 	rdb := internal.NewCache(reditConnectionString,
 		globalRedisUser,
 		globalRedisPassword,
