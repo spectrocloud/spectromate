@@ -11,8 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	_ "go.uber.org/automaxprocs"
-	"spectrocloud.com/docs-slack-bot/endpoints"
-	"spectrocloud.com/docs-slack-bot/internal"
+	"spectrocloud.com/spectromate/endpoints"
+	"spectrocloud.com/spectromate/internal"
 )
 
 var (

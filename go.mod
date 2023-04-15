@@ -1,4 +1,4 @@
-module spectrocloud.com/docs-slack-bot
+module spectrocloud.com/spectromate
 
 go 1.20
 

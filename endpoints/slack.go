@@ -2,13 +2,14 @@ package endpoints
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
-	"spectrocloud.com/docs-slack-bot/internal"
-	"spectrocloud.com/docs-slack-bot/slackCmds"
+	"spectrocloud.com/spectromate/internal"
+	"spectrocloud.com/spectromate/slackCmds"
 )
 
 // NewHandlerContext returns a new CounterRoute with a database connection.
@@ -17,7 +18,6 @@ func NewHelpHandlerContext(ctx context.Context, signingSecret, mendableApiKey st
 }
 
 func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *http.Request) {
-	log.Debug().Msg("Slack request received.")
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -62,10 +62,28 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 // getHandler returns a health check response.
 func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request) ([]byte, error) {
 
-	var returnPayload []byte
+	var (
+		returnPayload []byte
+		userCmd       string
+	)
+
+	parts := strings.Split(slack.SlackEvent.Text, " ")
+
+	// Check if there are any parts
+	if len(parts) > 0 {
+		// Trim any leading or trailing whitespace from the first part
+		userCmd = strings.Split(slack.SlackEvent.Text, " ")[0]
+	} else {
+		log.Debug().Msg("No parts found in the Slack event text.")
+		userCmd = "help"
+	}
 
 	// Get the command from the Slack event.
-	userCmd := strings.Split(slack.SlackEvent.Text, " ")[0]
+	err := checkAfterKeyword(slack.SlackEvent.Text, userCmd)
+	if err != nil {
+		userCmd = "help"
+	}
+
 	// Convert the command to a SlackCommands type.
 	cmd, err := determineCommand(userCmd)
 	if err != nil {
@@ -124,12 +142,43 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 // An error is returned if the string does not match a SlackCommands type.
 func determineCommand(input string) (SlackCommands, error) {
 
+	if strings.TrimSpace(input) == "" {
+		return -1, errors.New("empty command")
+	}
+
 	cmd, err := SlackCommandsFromString(input)
 	if err != nil {
 		internal.LogError(err)
 		log.Info().Err(err).Msg("Error converting string to SlackCommands type.")
 		return cmd, err
 	}
-
+	log.Debug().Msgf("Determined Command: %s", cmd)
 	return cmd, nil
+}
+
+func checkAfterKeyword(input string, keyword string) error {
+	// Split the input string by whitespace using strings.Fields
+	parts := strings.Fields(input)
+
+	// Find the index of the keyword in the parts
+	keywordIndex := -1
+	for i, part := range parts {
+		if part == keyword {
+			keywordIndex = i
+			break
+		}
+	}
+
+	// Check if there is anything after the keyword
+	if keywordIndex < len(parts)-1 {
+		// Check if anything after the keyword is empty
+		if strings.TrimSpace(parts[keywordIndex+1]) == "" {
+			return errors.New("nothing after keyword")
+		}
+	} else {
+		return errors.New("nothing after keyword")
+	}
+
+	// No error
+	return nil
 }

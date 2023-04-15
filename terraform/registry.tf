@@ -1,11 +1,10 @@
-# resource "spectrocloud_registry_oci" "image_registry" {
+# resource "spectrocloud_registry_helm" "github-registry" {
 #   name       = var.image_registry_name
-#   type       = "basic"
-#   endpoint   = "ghcr.io"
+#   endpoint   = var.image_registry_endpoint
 #   is_private = true
 #   credentials {
-#     credential_type = "sts"
-#     arn             = "arn:aws:iam::123456:role/stage-demo-ecr"
-#     external_id     = "sofiwhgowbrgiornM="
+#     credential_type = "basic"
+#     username        = var.github_registry_username
+#     password        = var.github_registry_password
 #   }
 # }

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/rs/zerolog/log"
-	"spectrocloud.com/docs-slack-bot/internal"
+	"spectrocloud.com/spectromate/internal"
 )
 
 // HelpCmd returns the help Slack command logic and payload.

@@ -16,7 +16,8 @@ COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
 COPY --from=builder --chown=appuser:appuser  /source/spectromate /usr/bin/
 
-RUN apk -U upgrade && apk add bash jq git --no-cache && mkdir /packs -p && chown appuser:appuser /packs
+RUN apk -U upgrade && apk add bash jq git --no-cache && mkdir /packs -p && chown appuser:appuser /packs \
+mkdir -p /var/log/spectromate && chown appuser:appuser /var/log/spectromate
 USER appuser
 
-ENTRYPOINT ["/usr/bin/spectromate"]
+CMD ["/usr/bin/spectromate", ">>", "/var/log/spectromate.log", "2>&1"]

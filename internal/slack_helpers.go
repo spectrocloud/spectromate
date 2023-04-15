@@ -267,7 +267,7 @@ func ReplyWithErrorMessage(responseURL string, isPrivate bool) error {
 				return err
 			}
 			return nil
-		}, retry.Attempts(10), retry.Delay(2*time.Second), retry.LastErrorOnly(true),
+		}, retry.Attempts(5), retry.Delay(2*time.Second), retry.LastErrorOnly(true),
 	)
 	if err != nil {
 		log.Debug().Err(err).Msg("error encountered while sending the Slack answer reply back HTTP request")

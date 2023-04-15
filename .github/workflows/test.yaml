@@ -65,7 +65,7 @@ jobs:
 
     - name: Go Tests
       run: |
-        go test ./...
+        go test -race ./...
 
   compile:
     name: Compile validation
@@ -88,10 +88,9 @@ jobs:
       with:  
         args: -v
   
-    - name: build & execute
+    - name: build
       run: |
-        make start
-        go build -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=1.0.0'" -o=spectromate -v
+        go build -race -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=1.0.0'" -o=spectromate -v
 
   Docker:
     needs: [run-ci,linting,test,compile]

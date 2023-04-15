@@ -10,7 +10,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
-	"spectrocloud.com/docs-slack-bot/internal"
+	"spectrocloud.com/spectromate/internal"
 )
 
 type SlackAskRequest struct {
@@ -50,6 +50,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 
 	// This will get the user's question.
 	// Split the string on spaces
+
 	words := strings.Split(s.slackEvent.Text, " ")[1:]
 	lastWord := words[len(words)-1]
 	userQuery := strings.Join(words[:len(words)-1], " ") + " " + strings.TrimRight(lastWord, "\r\n")

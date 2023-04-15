@@ -8,18 +8,21 @@
 </p>
 
 
-## Overview
+## Overview 👩‍🚀 🧑‍🚀 🧑🏿‍🚀
 
 SpectroMate is an API server with extended functionality designed for Slack integration in the form of a bot. You can use SpectroMate to handle [slash commands](https://api.slack.com/interactivity/slash-commands), and [message actions](https://api.slack.com/reference/interaction-payloads). You can also use SpectroMate to handle non-slack-related events by creating API endpoints for other purposes. 
 
 SpectroMate is designed for deployment in [Palette](https://console.spectrocloud.com) using the Palette Dev Engine (PDE). Using simplifies the management and deployment of SpectroMate.
 
-The following is an architecture overview of SpectroMate. 
+---
 
-![An architecture diagram with all the components that support SpectroMate](./static/images/infrastructure-architecture.png)
+## Getting Started 🚀
 
+To get started with Spectromate follow the steps outlined in the [Getting Started](./docs/getting-started.md) guide.
 
-## API Endpoints
+---
+
+## API Endpoints 🕹️
 
 The following endpoints are available.
 
@@ -30,12 +33,41 @@ The following endpoints are available.
 | A slack endpoint for handling slack message actions.      | `/slack/actions`   |
 
 
-## Slack Commands
+## Slack Commands 🛠️
 
 The following endpoints are available.
 
-| Description                                               | Endpoint           |
+| Description                                               | Command           |
 | ----------------------------------------------------------|-------------------|
 | Displays information to the user for how to use SpectroMate. Invalid commands return the help response.             | `/help`          |
 | Used to query the Mendable and ask documentation questions to a trained model.| `/ask`           |
 | Same as the `/ask` but responses are only visible to the user versus the entire channel.      | `/pask`   |
+
+
+## Slack Actions 🪡
+
+Spectromate supports the following actions.
+
+| Description                                               | Action           |
+| ----------------------------------------------------------|-------------------|
+| Handles the possitive feedback button and submits the feedback to Mendable.  | `ask_model_positive_feedback` |
+| Handles the negavtive feedback button and submits the feedback to Mendable.| `ask_model_negative_feedback` |
+
+
+## Architecture
+
+The following is an architectural overview of SpectroMate. 
+
+![An architecture diagram with all the components that support SpectroMate](./static/images/infrastructure-architecture.png)
+
+
+## Supported Features and Limitations
+
+|Action| Supported | Notes |
+|---|---|---|
+| Slash command| ✅ || Supported through the `/slack` endpoint.|
+| Message buttons | ✅| Supported through the `/slack/actions` endpoint.|
+| Mentions | ❌ | Currently unavailable. |
+| Health checks | ✅ | Supported through the `/health` endpoint.|
+| Verify Slack signature| ✅ | Verification of Slack signature is applied to all Slack endpoints.|
+| Metrics | ❌ | Currently unavailable. |

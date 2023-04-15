@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog/log"
-	"spectrocloud.com/docs-slack-bot/internal"
-	"spectrocloud.com/docs-slack-bot/slackActions"
+	"spectrocloud.com/spectromate/internal"
+	"spectrocloud.com/spectromate/slackActions"
 )
 
 // NewHandlerContext returns a new CounterRoute with a database connection.

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/rs/zerolog/log"
-	"spectrocloud.com/docs-slack-bot/internal"
+	"spectrocloud.com/spectromate/internal"
 )
 
 type SlackActionRequest struct {
@@ -57,6 +57,17 @@ func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.Menda
 		return
 	}
 
+	log.Info().Msg("About to check")
+	log.Debug().Interface("message", action)
+	// prevent panic if the message is missing any of the expected blocks
+	if len(action.action.Message.Blocks) < 7 {
+		log.Debug().Interface("message", action.action.Message).Msg("message is missing blocks.")
+		log.Debug().Err(err).Msg("error parsing message blocks.")
+		internal.LogError(err)
+		globalErr = &err
+		return
+	}
+
 	originalAnswer := action.action.Message.Blocks[4].Text.Text
 	orginalQuestion := action.action.Message.Blocks[2].Text.Text
 	orignalSourceLinks := action.action.Message.Blocks[6].Text.Text
@@ -75,6 +86,8 @@ func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.Menda
 		globalErr = &err
 		// Waiting 5 seconds before returning the error to Slack.
 	}
+
+	log.Info().Msg("Successfully sent the answer back to Slack.")
 
 }
 

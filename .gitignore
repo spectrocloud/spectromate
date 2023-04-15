@@ -21,3 +21,8 @@ data/
 .DS_STORE
 node_modules/
 .terraform/
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+spectromate
+backend.tf

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
-	"spectrocloud.com/docs-slack-bot/internal"
+	"spectrocloud.com/spectromate/internal"
 )
 
 type HealthRoute struct {

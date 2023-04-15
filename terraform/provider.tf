@@ -4,6 +4,10 @@ terraform {
       version = ">= 0.12.0"
       source  = "spectrocloud/spectrocloud"
     }
+    random = {
+      version = ">= 3.5.0"
+      source  = "hashicorp/random"
+    }
   }
 }
 
