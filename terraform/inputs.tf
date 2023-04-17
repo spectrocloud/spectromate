@@ -58,7 +58,7 @@ variable "github_registry_password" {
 variable "image" {
   type        = string
   description = "The Spectromate image to deploy."
-  default     = "spectrocloud/spectromate/spectromate:dev"
+  default     = "spectrocloud/spectromate:dev"
 }
 
 variable "cluster_name" {

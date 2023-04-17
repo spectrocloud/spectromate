@@ -26,4 +26,10 @@ resource "spectrocloud_application_profile" "spectromate" {
     })
   }
   tags = var.tags
+
+  lifecycle {
+    ignore_changes = [
+      pack,
+    ]
+  }
 }

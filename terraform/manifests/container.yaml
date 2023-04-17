@@ -69,7 +69,7 @@ containerService:
     - name: REDIS_USER
       value: "{{.spectro.app.$appDeploymentName.redis.USERNAME}}"
     - name: REDIS_PASSWORD
-      value: "{{.spectro.app.$appDeploymentName.redis.PASSWORD}}}"
+      value: "{{.spectro.app.$appDeploymentName.redis.PASSWORD}}"
     - name: REDIS_PORT
       value: "{{.spectro.app.$appDeploymentName.redis.REDISMSTR_SVC_PORT}}"
     - name: MENDABLE_API_KEY
