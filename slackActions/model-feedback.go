@@ -60,10 +60,7 @@ func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.Menda
 	log.Debug().Interface("message", action)
 	// prevent panic if the message is missing any of the expected blocks
 	if len(action.action.Message.Blocks) < 7 {
-		// log.Debug().Interface("message", action.action.Message).Msg("message is missing blocks.")
-		// log.Debug().Err(err).Msg("error parsing message blocks.")
-		// internal.LogError(err)
-		// globalErr = &err
+		log.Debug().Interface("message", action.action.Message).Msg("message is missing blocks.")
 
 		slackReplyPayload, err := replyWithEmptyMessage(isPrivate, ratingScore)
 		if err != nil {
@@ -110,6 +107,7 @@ func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.Menda
 		internal.LogError(err)
 		globalErr = &err
 		// Waiting 5 seconds before returning the error to Slack.
+		return
 	}
 
 	log.Info().Msg("Successfully sent the answer back to Slack.")
