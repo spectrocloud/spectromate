@@ -1,0 +1,17 @@
+*.csv
+spectromate
+.DS_STORE
+node_modules/
+static/
+.github/
+node_modules/
+package*.json
+.releaserc.yml
+test/
+*.csv
+.husky/
+CHANGELOG
+README.md
+data/
+terraform/
+docs/

@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7.0.5-alpine3.17
+    ports:
+      - "6379:6379"
+    command: redis-server --bind 0.0.0.0
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./data:/data
+    restart: always
+  redis-cli:
+    image: redis:7.0.5-alpine3.17
+    depends_on:
+      - redis
+    entrypoint: redis-cli
+    tty: true
+    restart: always

@@ -1,0 +1,49 @@
+postReadinessHooks:
+  outputParameters:
+  - name: REDISMSTR_SVC
+    type: staticSecret
+    spec:
+      namespace: "{{.spectro.system.appdeployment.tiername}}-ns"
+      secretName: "{{.spectro.system.appdeployment.tiername}}-service"
+      secretKey: "service"
+  - name: REDISMSTR_SVC_NAMESPACE
+    type: lookupSecret
+    spec:
+      namespace: "{{.spectro.system.appdeployment.tiername}}-ns"
+      secretName: "{{.spectro.system.appdeployment.tiername}}-custom-secret"
+      ownerReference:
+        apiVersion: v1
+        kind: Service
+        name: "{{.spectro.system.appdeployment.tiername}}"
+      keyToCheck: metadata.namespace
+  - name: REDISMSTR_SVC_PORT
+    type: lookupSecret
+    spec:
+      namespace: "{{.spectro.system.appdeployment.tiername}}-ns"
+      secretName: "{{.spectro.system.appdeployment.tiername}}-custom-secret"
+      ownerReference:
+        apiVersion: v1
+        kind: Service
+        name: "{{.spectro.system.appdeployment.tiername}}"
+      keyToCheck: spec.ports[0].port
+  - name: PASSWORD
+    type: staticSecret
+    spec:
+      namespace: "{{.spectro.system.appdeployment.tiername}}-ns"
+      secretName: "{{.spectro.system.appdeployment.tiername}}-redis-auth"
+      secretKey: "password"
+  - name: USERNAME
+    type: staticSecret
+    spec:
+      namespace: "{{.spectro.system.appdeployment.tiername}}-ns"
+      secretName: "{{.spectro.system.appdeployment.tiername}}-redis-auth"
+      secretKey: "username"
+readinessCheck:
+  v1beta1:
+  - name: "{{.spectro.system.appdeployment.tiername}}"
+    namespace: "{{.spectro.system.appdeployment.tiername}}-ns"
+    group: "apps"
+    version: "v1"
+    kind: "StatefulSet"
+    keyToCheck: "status.readyReplicas"
+    expectedValue: "1"
