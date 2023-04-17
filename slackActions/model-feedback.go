@@ -57,20 +57,42 @@ func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.Menda
 		return
 	}
 
-	log.Info().Msg("About to check")
 	log.Debug().Interface("message", action)
 	// prevent panic if the message is missing any of the expected blocks
 	if len(action.action.Message.Blocks) < 7 {
 		log.Debug().Interface("message", action.action.Message).Msg("message is missing blocks.")
-		log.Debug().Err(err).Msg("error parsing message blocks.")
-		internal.LogError(err)
-		globalErr = &err
+
+		slackReplyPayload, err := replyWithEmptyMessage(isPrivate, ratingScore)
+		if err != nil {
+			log.Info().Err(err).Msg("Error creating the rating markdown payload.")
+			globalErr = &err
+			return
+		}
+
+		err = internal.ReplyWithAnswer(action.action.ResponseURL, slackReplyPayload, isPrivate)
+		if err != nil {
+			log.Info().Err(err).Msg("Error when attempting to return the answer back to Slack.")
+			internal.LogError(err)
+			globalErr = &err
+			return
+		}
+
 		return
 	}
 
-	originalAnswer := action.action.Message.Blocks[4].Text.Text
-	orginalQuestion := action.action.Message.Blocks[2].Text.Text
-	orignalSourceLinks := action.action.Message.Blocks[6].Text.Text
+	var originalAnswer, orginalQuestion, orignalSourceLinks string
+
+	if len(action.action.Message.Blocks) > 4 && action.action.Message.Blocks[4].Text.Text != "" {
+		originalAnswer = action.action.Message.Blocks[4].Text.Text
+	}
+
+	if len(action.action.Message.Blocks) > 2 && action.action.Message.Blocks[2].Text.Text != "" {
+		orginalQuestion = action.action.Message.Blocks[2].Text.Text
+	}
+
+	if len(action.action.Message.Blocks) > 6 && action.action.Message.Blocks[6].Text.Text != "" {
+		orignalSourceLinks = action.action.Message.Blocks[6].Text.Text
+	}
 
 	slackReplyPayload, err := rateFeedbackMarkdownPayload(originalAnswer, orginalQuestion, orignalSourceLinks, isPrivate, ratingScore)
 	if err != nil {
@@ -85,10 +107,65 @@ func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.Menda
 		internal.LogError(err)
 		globalErr = &err
 		// Waiting 5 seconds before returning the error to Slack.
+		return
 	}
 
 	log.Info().Msg("Successfully sent the answer back to Slack.")
 
+}
+
+func replyWithEmptyMessage(isPrivate bool, rating internal.MendableRatingScore) ([]byte, error) {
+	var (
+		responseType    string
+		responseMessage string
+	)
+
+	if isPrivate {
+		responseType = "ephemeral"
+	} else {
+		responseType = "in_channel"
+	}
+
+	if rating == internal.PositiveFeedbackScore {
+		responseMessage = internal.DefaultPositiveRatingMessage
+	}
+
+	if rating == internal.NegativeFeedbackScore {
+		responseMessage = internal.DefaultNegativeRatingMessage
+	}
+
+	payload := internal.SlackPayload{
+		ResponseType:    responseType,
+		DeleteOriginal:  false,
+		ReplaceOriginal: false,
+		Blocks: []internal.SlackBlock{
+			{
+				Type: "header",
+				Text: &internal.SlackTextObject{
+					Type: "plain_text",
+					Text: "Docs Answer",
+				},
+			},
+			{
+				Type: "divider",
+			},
+			{
+				Type: "section",
+				Text: &internal.SlackTextObject{
+					Type: "mrkdwn",
+					Text: responseMessage,
+				},
+			},
+		},
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	log.Debug().Msgf("Slack Answer Payload: %v", string(payloadBytes))
+	return payloadBytes, nil
 }
 
 func rateFeedbackMarkdownPayload(content, question, links string, isPrivate bool, rating internal.MendableRatingScore) ([]byte, error) {
