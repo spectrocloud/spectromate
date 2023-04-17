@@ -135,7 +135,9 @@ func replyWithEmptyMessage(isPrivate bool, rating internal.MendableRatingScore) 
 	}
 
 	payload := internal.SlackPayload{
-		ResponseType: responseType,
+		ResponseType:    responseType,
+		DeleteOriginal:  false,
+		ReplaceOriginal: false,
 		Blocks: []internal.SlackBlock{
 			{
 				Type: "header",
