@@ -68,6 +68,7 @@ The following is an architectural overview of SpectroMate.
 | Slash command| ✅ | Supported through the `/slack` endpoint.|
 | Message buttons | ✅| Supported through the `/slack/actions` endpoint.|
 | Mentions | ❌ | Currently unavailable. |
+| Threads | ❌ | Currently unavailable. |
 | Health checks | ✅ | Supported through the `/health` endpoint.|
 | Verify Slack signature| ✅ | Verification of Slack signature is applied to all Slack endpoints.|
 | Metrics | ❌ | Currently unavailable. |
