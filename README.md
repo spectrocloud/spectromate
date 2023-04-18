@@ -82,4 +82,4 @@ We welcome all types of contributions. Please take a moment and review our [cont
 
 # Open Source Licenses
 
-Review the [Open Source Acknowledgment]((./docs/open-source.md)) reference resource for a complete list of open-source licenses used in this project.
+Review the [Open Source Acknowledgment](./docs/open-source.md) reference resource for a complete list of open-source licenses used in this project.
