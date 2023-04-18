@@ -74,7 +74,7 @@ The following is an architectural overview of SpectroMate.
 | Metrics | ❌ | Currently unavailable. |
 
 
-!> There is a limitation with `pask` messages and submitting feedback. The original message is replaced with a feedback acknowledgment. This behavior stems from the Slack API not including the original message when handling action events from an ephemeral message.
+:warning: There is a limitation with `pask` messages when submitting feedback. The answer response message is replaced with a feedback acknowledgment message. This behavior stems from the Slack API not including the original message when handling action events from an ephemeral message.
 
 # Contribution
 
