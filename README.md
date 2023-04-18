@@ -72,3 +72,14 @@ The following is an architectural overview of SpectroMate.
 | Health checks | ✅ | Supported through the `/health` endpoint.|
 | Verify Slack signature| ✅ | Verification of Slack signature is applied to all Slack endpoints.|
 | Metrics | ❌ | Currently unavailable. |
+
+
+!> There is a limitation with `pask` messages and submitting feedback. The original message is replaced with a feedback acknowledgment. This behavior stems from the Slack API not including the original message when handling action events from an ephemeral message.
+
+# Contribution
+
+We welcome all types of contributions. Please take a moment and review our [contribution guidelines](./docs/contributions.md).
+
+# Open Source Licenses
+
+Review the [Open Source Acknowledgment]((./docs/open-source.md)) reference resource for a complete list of open-source licenses used in this project.

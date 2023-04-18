@@ -14,10 +14,15 @@ server:
 	@echo "Starting the server..."
 	go run main.go
 
-
-make init: 
+init: 
 	@echo "Installing dependencies..."
 	go mod download
 	go install github.com/golang/mock/mockgen@v1.6.0
 	~/go/bin/mockgen -source=internal/cache.go -destination=mock/mock_cache.go -package=mock
+
+license:
+	@echo "Checking license headers..."
+	~/go/bin/go-licenses report spectrocloud.com/spectromate --template=docs/open-source.tpl > docs/open-source.md 
+
+
 	

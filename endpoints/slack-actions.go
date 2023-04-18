@@ -56,7 +56,7 @@ func (actions *ActionsRoute) ActionsHTTPHandler(writer http.ResponseWriter, requ
 }
 
 // getHandler invokes the modelFeedbackHandler function from the slackActions package
-func (health *ActionsRoute) getHandler(routeRequest *ActionsRoute, reqeust *http.Request, action *internal.SlackActionEvent) ([]byte, error) {
+func (actions *ActionsRoute) getHandler(routeRequest *ActionsRoute, reqeust *http.Request, action *internal.SlackActionEvent) ([]byte, error) {
 	var returnPayload []byte
 
 	slackRequestInfo := slackActions.NewSlackActionRequest(routeRequest.ctx, action, routeRequest.mendableApiKey)
@@ -64,14 +64,13 @@ func (health *ActionsRoute) getHandler(routeRequest *ActionsRoute, reqeust *http
 	switch action.Actions[0].ActionID {
 
 	case internal.ActionsAskModelPositiveFeedbackID:
-		log.Debug().Msg("Positive feedback action.")
+		log.Debug().Msg("Positive feedback action triggered.")
 		go slackActions.ModelFeedbackHandler(slackRequestInfo, internal.PositiveFeedbackScore)
 	case internal.ActionsAskModelNegativeFeedbackID:
-		log.Debug().Msg("Negative feedback action.")
+		log.Debug().Msg("Negative feedback action triggered.")
 		go slackActions.ModelFeedbackHandler(slackRequestInfo, internal.NegativeFeedbackScore)
 	default:
 		log.Debug().Msg("Unknown action.")
-
 	}
 
 	return returnPayload, nil
