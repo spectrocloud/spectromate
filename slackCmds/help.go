@@ -10,7 +10,7 @@ import (
 // HelpCmd returns the help Slack command logic and payload.
 func HelpCmd() ([]byte, error) {
 
-	markdownContent := "*Commands*\n\nThe following commands are available:\n\n- `help` - A summary of all available commands.\n- `ask` - Ask a docs related question.\n- `pask` - Ask a docs related question privately and receive a response only you can view."
+	markdownContent := "*Commands*\n\nThe following commands are available:\n\n\n- `help` - A summary of all available commands.\n\n- `ask` - Ask a docs related question. Example: `/docs ask how do I enable Prometheus?`\n\n- `pask` - Same as `ask` but with private replies."
 	returnPayload, err := helpMarkdownPayload(markdownContent, "Docs Answer")
 	if err != nil {
 		log.Info().Err(err).Msg("Error creating markdown payload.")

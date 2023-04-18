@@ -16,8 +16,7 @@ type SlackRoute struct {
 	signingSecret  string
 	mendableApiKey string
 	SlackEvent     *internal.SlackEvent
-	// cache          *redis.Client
-	cache internal.Cache
+	cache          internal.Cache
 }
 
 type ActionsRoute struct {

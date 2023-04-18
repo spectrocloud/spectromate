@@ -114,6 +114,7 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
 			return nil, err
 		}
+		// Reply back to slack with a 200 status code to avoid the 3 second timeout.
 		returnPayload = reply200Payload
 		go slackCmds.AskCmd(slackRequestInfo, false)
 	case PAsk:
@@ -123,6 +124,7 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			slack.mendableApiKey,
 			slack.cache,
 		)
+		// Reply back to slack with a 200 status code to avoid the 3 second timeout.
 		reply200Payload, err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, true)
 		if err != nil {
 			log.Info().Err(err).Msg("failed to reply to slack with status 200.")
