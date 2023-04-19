@@ -23,11 +23,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: svu-version-bump
-        uses: jsok/svu-version-bump-action@v2.0.0
-
       - name: get-tags 
         run: git fetch --force --tags
+
+      - name: svu-version-bump
+        uses: jsok/svu-version-bump-action@v2.0.0
+        with:
+          bump: 'next'
 
       - id: tag
         run: |
