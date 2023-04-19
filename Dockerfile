@@ -7,7 +7,8 @@ ARG VERSION
 
 ADD ./ /source
 RUN cd /source && \
-adduser -H -u 1002 -D appuser appuser && \
+addgroup -g 1002 appuser && \
+adduser -H -u 1002 -D -G appuser appuser && \
 go build -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=${VERSION}'" -o spectromate -v
 
 FROM alpine:latest
@@ -15,9 +16,11 @@ FROM alpine:latest
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
 COPY --from=builder --chown=appuser:appuser  /source/spectromate /usr/bin/
+COPY entrypoint.sh /usr/bin/
 
 RUN apk -U upgrade && apk add bash jq git --no-cache && mkdir /packs && chown -R appuser:appuser /packs && \
-mkdir -p /var/log/spectromate && chown -R appuser:appuser /var/log/spectromate
+mkdir -p /var/log/spectromate && chown -R appuser:appuser /var/log/spectromate && \
+touch /var/log/spectromate.log && chown appuser:appuser /var/log/spectromate.log && chmod 664 /var/log/spectromate.log
 USER appuser
 
-CMD ["/usr/bin/spectromate", ">>", "/var/log/spectromate.log", "2>&1"]
+CMD ["/usr/bin/entrypoint.sh"]

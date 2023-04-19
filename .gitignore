@@ -27,3 +27,4 @@ node_modules/
 spectromate
 backend.tf
 redis/
+dist/

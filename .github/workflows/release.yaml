@@ -1,14 +1,37 @@
 name: Release
 
+# on:
+#   push:
+#     branches: [ main ]
+
 on:
   push:
-    branches: [ main ]
+    branches-ignore: [ main ]
 
 permissions:
   contents: write
 
 jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    outputs:
+      VERSION: ${{ steps.tag.outputs.test }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: git fetch --force --tags
+      - id: tag
+        run: |
+          echo "VERSION=world" >> $GITHUB_OUTPUT
+          git tag "$(svu next)"
+          git push --tags
+               
+
   goreleaser:
+    needs: [tag]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,11 +40,13 @@ jobs:
       - run: git fetch --force --tags
       - uses: actions/setup-go@v4
         with:
-          check-latest: true
+          check-latest: true    
       - uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
-          version: latest
-          args: release --clean
+          version: ${{ needs.tag.outputs.VERSION }}
+          args: release --clean --snapshot --skip-publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: verify
+        run: ls -l dist/ && cat dist/artifacts.json | jq
