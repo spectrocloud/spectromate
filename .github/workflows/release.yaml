@@ -8,6 +8,10 @@ on:
   push:
     branches-ignore: [ main ]
 
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  SVU_VERSION: 1.10.2
+
 permissions:
   contents: write
 
@@ -26,16 +30,20 @@ jobs:
       - name: get-tags 
         run: git fetch --force --tags
 
-      - name: svu-version-bump
-        uses: jsok/svu-version-bump-action@v2.0.0
-        with:
-          bump: 'next'
+      - name: Get svu
+        run: |
+          URL="https://github.com/caarlos0/svu/releases/download/v${VERSION}/svu_${VERSION}_linux_amd64.tar.gz"
+          wget $URL -O svu.tar.gz
+          tar -xzf svu.tar.gz
+          chmod +x svu
+          sudo mv svu /usr/local/bin/
 
       - id: tag
         run: |
           echo "VERSION=world" >> $GITHUB_OUTPUT
           git tag "$(svu next)"
           git push --tags
+
                
 
   goreleaser:
