@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "VERSION=$(svu next)" >> $GITHUB_OUTPUT
           git tag "$(svu next)"
-          # git push --tags
+          git push --tags
 
   goreleaser:
     needs: [tag]
@@ -55,11 +55,10 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           check-latest: true    
-      # - uses: goreleaser/goreleaser-action@v4
-      #   with:
-      #     distribution: goreleaser
-      #     args: release --clean
-      - run: echo ${{ needs.tag.outputs.VERSION }} 
+      - uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
