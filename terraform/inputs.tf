@@ -58,7 +58,7 @@ variable "github_registry_password" {
 variable "image" {
   type        = string
   description = "The Spectromate image to deploy."
-  default     = "spectrocloud/spectromate:dev"
+  default     = "ghcr.io/spectrocloud/spectromate:dev"
 }
 
 variable "cluster_name" {
@@ -94,5 +94,5 @@ variable "trace_level" {
 variable "tags" {
   type        = list(string)
   description = "The default tags to apply to Palette resources"
-  default     = ["spectro-cloud-education", "app:spectromate", "repository:spectrocloud/spectromate/", "terraform_managed:true"]
+  default     = ["spectro-cloud-education", "app:spectromate", "repository:spectrocloud/spectromate", "terraform_managed:true"]
 }

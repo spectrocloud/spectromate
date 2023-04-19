@@ -19,7 +19,6 @@ resource "spectrocloud_application_profile" "spectromate" {
     source_app_tier = data.spectrocloud_pack_simple.container_pack.id
     values = templatefile("manifests/container.yaml", {
       image                = var.image
-      registryUrl          = "ghcr.io/"
       slack_signing_secret = var.slack_signing_secret
       mendable_api_key     = var.mendable_api_key
       trace_level          = var.trace_level

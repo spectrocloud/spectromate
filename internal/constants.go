@@ -6,21 +6,38 @@ import (
 )
 
 const (
-	ApiVersionV1                      string        = "v1/"
-	ApiPath                           string        = "/api/"
-	ApiPrefixV1                       string        = ApiPath + ApiVersionV1
-	SlackPostMessageURL               string        = "https://slack.com/api/chat.postMessage"
-	SlackDefaultUserErrorMessage      string        = "An error occured with the help command. Please reach out to `#docs` for assistance."
-	MendandableNewConversationURL     string        = "https://api.mendable.ai/v0/newConversation"
-	MendableChatQueryURL              string        = "https://api.mendable.ai/v0/mendableChat"
-	MendableRatingFeedbackURL         string        = "https://api.mendable.ai/v0/rateMessage"
-	DefaultUserErrorMessage           string        = `:warning: I'm sorry, I'm having technical issues. Notify the the docs team @ #docs and please try again later.`
-	DefaultNotFoundResponse           string        = `I'm sorry, I couldn't find an answer to your question. Please provide me feedback and try rephrasing your question.`
-	ActionsAskModelPositiveFeedbackID string        = "ask_model_positive_feedback"
-	ActionsAskModelNegativeFeedbackID string        = "ask_model_negative_feedback"
-	DefaultCacheExpirationPeriod      time.Duration = 15 * time.Minute
-	DefaultPositiveRatingMessage      string        = `Thank you for providing the :thumbsup: feedback!`
-	DefaultNegativeRatingMessage      string        = `Thank you for providing the :thumbsdown: feedback!`
+	// ApiVersionV1 is the version for the v1 API.
+	ApiVersionV1 string = "v1/"
+	// ApiPath is the path for the API.
+	ApiPath string = "/api/"
+	// ApiPrefixV1 is the prefix for the v1 API.
+	ApiPrefixV1 string = ApiPath + ApiVersionV1
+	// SlackPostMessageURL is the URL for the Slack chat.postMessage API.
+	SlackPostMessageURL string = "https://slack.com/api/chat.postMessage"
+	// SlackDefaultUserErrorMessage is the default error message for the user.
+	SlackDefaultUserErrorMessage string = "An error occured with the help command. Please reach out to `#docs` for assistance."
+	// MendableNewConversationURL is the URL for the Mendable new conversation API.
+	MendandableNewConversationURL string = "https://api.mendable.ai/v0/newConversation"
+	// MendableChatQueryURL is the URL for the Mendable chat query API.
+	MendableChatQueryURL string = "https://api.mendable.ai/v0/mendableChat"
+	// MendableRatingFeedbackURL is the URL for the Mendable rating feedback API.
+	MendableRatingFeedbackURL string = "https://api.mendable.ai/v0/rateMessage"
+	// DefaultUserErrorMessage is the default error message for the user.
+	DefaultUserErrorMessage string = `:warning: I'm sorry, I'm having technical issues. Notify the docs team @ #docs and please try again later.`
+	// DefaultNotFoundResponse is the default response for when no answer is found.
+	DefaultNotFoundResponse string = `I'm sorry, I couldn't find an answer to your question. Please provide me feedback and try rephrasing your question.`
+	// ActionsAskModelPositiveFeedbackID is the ID for the positive feedback action.
+	ActionsAskModelPositiveFeedbackID string = "ask_model_positive_feedback"
+	// ActionsAskModelNegativeFeedbackID is the ID for the negative feedback action.
+	ActionsAskModelNegativeFeedbackID string = "ask_model_negative_feedback"
+	// DefaultCacheExpirationPeriod is the default expiration period for the cache.
+	DefaultCacheExpirationPeriod time.Duration = 15 * time.Minute
+	// DefaultMendableQueryTimeout is the default timeout for Mendable queries.
+	DefaultMendableQueryTimeout time.Duration = 60 * time.Second
+	// DefaultPositiveRatingMessage is the default message for positive feedback.
+	DefaultPositiveRatingMessage string = `Thank you for providing the :thumbsup: feedback!`
+	// DefaultNegativeRatingMessage is the default message for negative feedback.
+	DefaultNegativeRatingMessage string = `Thank you for providing the :thumbsdown: feedback!`
 )
 
 // GetRandomWaitMessage returns a random wait message.

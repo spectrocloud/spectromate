@@ -132,7 +132,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 	}
 
 	client := &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: DefaultMendableQueryTimeout,
 	}
 
 	request, err := http.NewRequest("POST", queryURL, bytes.NewBuffer(jsonData))
