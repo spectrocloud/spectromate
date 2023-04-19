@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      VERSION: ${{ steps.tag.outputs.test }}
+      VERSION: ${{ steps.tag.outputs.VERSION }}
 
     steps:
       - uses: actions/checkout@v3
