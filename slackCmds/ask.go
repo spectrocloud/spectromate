@@ -373,7 +373,7 @@ func getUserCache(ctx context.Context, s *SlackAskRequest) (bool, *internal.Cach
 func linksBuilderString(urls []string) string {
 
 	if len(urls) == 0 {
-		return ":mag: Unable identify a specific documentation URL."
+		return internal.DefaultNoSourcesIdentifiedMessage
 	}
 
 	var sb strings.Builder

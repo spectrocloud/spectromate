@@ -38,6 +38,8 @@ const (
 	DefaultPositiveRatingMessage string = `Thank you for providing the :thumbsup: feedback!`
 	// DefaultNegativeRatingMessage is the default message for negative feedback.
 	DefaultNegativeRatingMessage string = `Thank you for providing the :thumbsdown: feedback!`
+	// DefaultNoSourcesIdentifiedMessage is the default message for when no sources are identified.
+	DefaultNoSourcesIdentifiedMessage string = `:mag: Unable to identify a specific documentation URL.`
 )
 
 // GetRandomWaitMessage returns a random wait message.

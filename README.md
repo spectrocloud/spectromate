@@ -26,11 +26,11 @@ To get started with Spectromate follow the steps outlined in the [Getting Starte
 
 The following endpoints are available.
 
-| Description                                               | Endpoint           |
-| ----------------------------------------------------------|-------------------|
-| Used for health checks by external resources.             | `/health`          |
-| A slack endpoint that can be used to handle slash commands.| `/slack`           |
-| A slack endpoint for handling slack message actions.      | `/slack/actions`   |
+| Description                                               | Endpoint           | Method |
+| ----------------------------------------------------------|-------------------| --|
+| Used for health checks by external resources.             | `/health`          | `GET` |
+| A slack endpoint that can be used to handle slash commands.| `/slack`           | `POST` |
+| A slack endpoint for handling slack message actions.      | `/slack/actions`   | `POST` |
 
 
 ## Slack Commands 🛠️
