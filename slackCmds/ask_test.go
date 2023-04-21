@@ -14,7 +14,7 @@ import (
 func TestLinksBuilderString(t *testing.T) {
 	// Test case 1: Empty slice
 	urls1 := []string{}
-	expected1 := ":mag: Unable identify a specific documentation URL."
+	expected1 := internal.DefaultNoSourcesIdentifiedMessage
 
 	result1 := linksBuilderString(urls1)
 	if result1 != expected1 {
