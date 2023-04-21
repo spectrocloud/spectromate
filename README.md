@@ -12,7 +12,7 @@
 
 SpectroMate is an API server with extended functionality designed for Slack integration in the form of a bot. You can use SpectroMate to handle [slash commands](https://api.slack.com/interactivity/slash-commands), and [message actions](https://api.slack.com/reference/interaction-payloads). You can also use SpectroMate to handle non-slack-related events by creating API endpoints for other purposes. 
 
-SpectroMate is designed for deployment in [Palette](https://console.spectrocloud.com) using the Palette Dev Engine (PDE). Palette PDE simplifies the deployment and management of SpectroMate.
+SpectroMate is designed for deployment in [Palette](https://console.spectrocloud.com) using the Palette Dev Engine (PDE) platform. Palette's PDE simplifies the deployment and management of SpectroMate. You can deploy SpectroMate into Palette and use the [free-tier resources](https://docs.spectrocloud.com/getting-started/palette-freemium).
 
 ---
 
@@ -80,6 +80,6 @@ The following is an architectural overview of SpectroMate.
 
 We welcome all types of contributions. Please take a moment and review our [contribution guidelines](./docs/contributions.md).
 
-# Open Source Licenses
+# Legal & Acknowledgment 
 
 Review the [Open Source Acknowledgment](./docs/open-source.md) reference resource for a complete list of open-source licenses used in this project.

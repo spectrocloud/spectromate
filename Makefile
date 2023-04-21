@@ -18,6 +18,7 @@ init:
 	@echo "Installing dependencies..."
 	go mod download
 	go install github.com/golang/mock/mockgen@v1.6.0
+	go install github.com/google/go-licenses@latest
 	~/go/bin/mockgen -source=internal/cache.go -destination=mock/mock_cache.go -package=mock
 
 license:
