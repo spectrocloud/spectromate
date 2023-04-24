@@ -29,7 +29,6 @@ jobs:
     # As of 8/8/2022 there is now way to enforce this beahvior in GitHub Actions CI.
       - run: exit 0
 
-
   linting:
     needs: [run-ci]
     runs-on: ubuntu-latest
