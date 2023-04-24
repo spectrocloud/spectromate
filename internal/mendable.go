@@ -200,7 +200,7 @@ func retrieveUniqueLinks(list *[]MendableSources) []string {
 		link := source.Link
 
 		// Skip links that are equal to "https://docs.spectrocloud.com"
-		if link == "https://docs.spectrocloud.com" {
+		if link == PublicDocumentationURL {
 			continue
 		}
 

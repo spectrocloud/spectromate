@@ -25,6 +25,8 @@ const (
 	MendableChatQueryURL string = "https://api.mendable.ai/v0/mendableChat"
 	// MendableRatingFeedbackURL is the URL for the Mendable rating feedback API.
 	MendableRatingFeedbackURL string = "https://api.mendable.ai/v0/rateMessage"
+	// PublicDocumentationURL is the URL for the public documentation.
+	PublicDocumentationURL string = "https://docs.spectrocloud.com"
 	// DefaultUserErrorMessage is the default error message for the user.
 	DefaultUserErrorMessage string = `:warning: I'm sorry, I'm having technical issues. Notify the docs team @ #docs and please try again later.`
 	// DefaultNotFoundResponse is the default response for when no answer is found.
