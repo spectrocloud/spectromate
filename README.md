@@ -1,18 +1,18 @@
+[![Release](https://github.com/spectrocloud/spectromate/actions/workflows/release.yaml/badge.svg?branch=main)](https://github.com/spectrocloud/spectromate/actions/workflows/release.yaml)
+[![Go version](https://img.shields.io/github/go-mod/go-version/spectrocloud/spectromate)](https://golang.org/dl/)
+
 # SpectroMate
-
-
-<p align="center">The home of SpectroMate :robot: </p>
 
 <p align="center">
   <img src="/static/images/mascot.png" alt="drawing" width="250"/>
 </p>
 
 
-## Overview 👩‍🚀 🧑‍🚀 🧑🏿‍🚀
+## Overview 👩‍🚀 🧑🏿‍🚀 🧑‍🚀 
 
 SpectroMate is an API server with extended functionality designed for Slack integration in the form of a bot. You can use SpectroMate to handle [slash commands](https://api.slack.com/interactivity/slash-commands), and [message actions](https://api.slack.com/reference/interaction-payloads). You can also use SpectroMate to handle non-slack-related events by creating API endpoints for other purposes. 
 
-SpectroMate comes with out-of-the-box support for [Mendable](https://www.mendable.ai/) integration. You can use your Mendable trained model to answer documentation-related questions by providing SpectroMate with your Mendable API key.  
+SpectroMate comes with out-of-the-box support for [Mendable](https://www.mendable.ai/) integration with Slack. You can use your Mendable-trained model to answer documentation-related questions by providing SpectroMate with your Mendable API key.  
 
   ![Example of a Slack question asked to Mendable](./static/images/mendable_ask_example.png)
 
@@ -65,7 +65,7 @@ The following is an architectural overview of SpectroMate.
 ![An architecture diagram with all the components that support SpectroMate](./static/images/infrastructure-architecture.png)
 
 
-## Supported Features and Limitations
+## Supported Features and Limitations 📐
 
 |Action| Supported | Notes |
 |---|---|---|
@@ -80,10 +80,10 @@ The following is an architectural overview of SpectroMate.
 
 :warning: There is a limitation with `pask` messages when submitting feedback. The answer response message is replaced with a feedback acknowledgment message. This behavior stems from the Slack API not including the original message when handling action events from an ephemeral message.
 
-# Contribution
+# Contribution 🫶
 
 We welcome all types of contributions. Please take a moment and review our [contribution guidelines](./docs/contributions.md).
 
-# Legal & Acknowledgment 
+# Legal & Acknowledgment 📜
 
 Review the [Open Source Acknowledgment](./docs/open-source.md) reference resource for a complete list of open-source licenses used in this project.

@@ -37,7 +37,7 @@ No modules.
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the cluster to create. | `string` | `"cluster-1"` | no |
 | <a name="input_github_registry_password"></a> [github\_registry\_password](#input\_github\_registry\_password) | The password for the image registry. Set using TF\_VAR environment variable. | `string` | n/a | yes |
 | <a name="input_github_registry_username"></a> [github\_registry\_username](#input\_github\_registry\_username) | The username for the image registry. Set using TF\_VAR environment variable. | `string` | n/a | yes |
-| <a name="input_image"></a> [image](#input\_image) | The Spectromate image to deploy. | `string` | `"ghcr.io/spectrocloud/spectromate:dev"` | no |
+| <a name="input_image"></a> [image](#input\_image) | The Spectromate image to deploy. | `string` | `"ghcr.io/spectrocloud/spectromate:v1.0.0"` | no |
 | <a name="input_image_registry_endpoint"></a> [image\_registry\_endpoint](#input\_image\_registry\_endpoint) | The endpoint of the image registry. | `string` | `"ghcr.io"` | no |
 | <a name="input_image_registry_name"></a> [image\_registry\_name](#input\_image\_registry\_name) | The name of the image registry. | `string` | `"github-image-registry-private"` | no |
 | <a name="input_mendable_api_key"></a> [mendable\_api\_key](#input\_mendable\_api\_key) | The value of the Mendable API Key. Set using TF\_VAR environment variable. | `string` | n/a | yes |
