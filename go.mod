@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/schema v1.2.0
 	github.com/redis/go-redis/v9 v9.0.3
 	github.com/rs/zerolog v1.29.0
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.8.2
 	go.uber.org/automaxprocs v1.5.2
 )
 
