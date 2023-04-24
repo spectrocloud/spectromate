@@ -1,3 +1,6 @@
+# Copyright (c) Spectro Cloud
+# SPDX-License-Identifier: Apache-2.0
+
 resource "spectrocloud_virtual_cluster" "cluster-1" {
   name              = var.cluster_name
   cluster_group_uid = data.spectrocloud_cluster_group.beehive.id

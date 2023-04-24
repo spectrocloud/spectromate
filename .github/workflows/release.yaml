@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  SVU_VERSION: 1.10.2
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    outputs:
+      VERSION: ${{ steps.tag.outputs.VERSION }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: get-tags 
+        run: git fetch --force --tags
+
+      - name: Get svu
+        run: |
+          URL="https://github.com/caarlos0/svu/releases/download/v${SVU_VERSION}/svu_${SVU_VERSION}_linux_amd64.tar.gz"
+          wget --quiet $URL --output-document svu.tar.gz
+          tar -xzf svu.tar.gz
+          chmod +x svu
+          sudo mv svu /usr/local/bin/
+
+      - id: tag
+        run: |
+          echo "VERSION=$(svu next)" >> $GITHUB_OUTPUT
+          git tag "$(svu next)"
+          git push --tags
+
+  goreleaser:
+    needs: [tag]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: git fetch --force --tags
+      - uses: actions/setup-go@v4
+        with:
+          check-latest: true    
+      - uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  Docker:
+    needs: [tag,goreleaser]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+        check-latest: true
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+
+    - name: Login to GHCR
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v4.0.0
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ghcr.io/${{ github.repository }}:${{ needs.tag.outputs.VERSION }}
+        build-args: |
+          VERSION=${{ needs.tag.outputs.VERSION }}

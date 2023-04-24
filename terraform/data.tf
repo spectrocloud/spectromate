@@ -1,3 +1,6 @@
+# Copyright (c) Spectro Cloud
+# SPDX-License-Identifier: Apache-2.0
+
 data "spectrocloud_cluster_group" "beehive" {
   name    = var.cluster-group-name
   context = "system"

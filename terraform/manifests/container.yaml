@@ -1,3 +1,6 @@
+# Copyright (c) Spectro Cloud
+# SPDX-License-Identifier: Apache-2.0
+
 pack:
   namespace: "{{.spectro.system.appdeployment.tiername}}-ns"
   releaseNameOverride: "{{.spectro.system.appdeployment.tiername}}"
@@ -57,7 +60,7 @@ postReadinessHooks:
       keyToCheck: spec.ports[0].port
 containerService:
   serviceName: "{{.spectro.system.appdeployment.tiername}}-svc"
-  registryUrl: ${registryUrl}
+  registryUrl: ""
   image: ${image}
   access: public
   ports:

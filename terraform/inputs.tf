@@ -1,3 +1,6 @@
+# Copyright (c) Spectro Cloud
+# SPDX-License-Identifier: Apache-2.0
+
 variable "project" {
   type        = string
   description = "The name of the Spectro Cloud project to use."
@@ -58,7 +61,7 @@ variable "github_registry_password" {
 variable "image" {
   type        = string
   description = "The Spectromate image to deploy."
-  default     = "spectrocloud/spectromate:dev"
+  default     = "ghcr.io/spectrocloud/spectromate:v1.0.0"
 }
 
 variable "cluster_name" {
@@ -94,5 +97,5 @@ variable "trace_level" {
 variable "tags" {
   type        = list(string)
   description = "The default tags to apply to Palette resources"
-  default     = ["spectro-cloud-education", "app:spectromate", "repository:spectrocloud/spectromate/", "terraform_managed:true"]
+  default     = ["spectro-cloud-education", "app:spectromate", "repository:spectrocloud/spectromate", "terraform_managed:true"]
 }

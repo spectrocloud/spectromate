@@ -1,3 +1,6 @@
+// Copyright (c) Spectro Cloud
+// SPDX-License-Identifier: Apache-2.0
+
 package endpoints
 
 import (
@@ -24,6 +27,17 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 
+	if request.Method != http.MethodPost {
+		log.Debug().Msg("Invalid method used for Slack endpoint.")
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		_, err := writer.Write([]byte("Invalid method used for Slack endpoint."))
+		if err != nil {
+			internal.LogError(err)
+			log.Error().Err(err).Msg("Error writing response to the Slack endpoint.")
+		}
+		return
+	}
+
 	// Validate the request signature came from the Spectro Cloud Slack app.
 	err := internal.SourceValidation(request.Context(), request, slack.signingSecret)
 	if err != nil {
@@ -39,9 +53,6 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 	// Set the slack event in the SlackRoute struct so it can be used by the other handlers.
 	slack.SlackEvent = &event
 
-	log.Debug().Msgf("Event: %+v", event)
-
-	log.Debug().Msgf("User: %+v", event.UserName)
 	log.Debug().Msgf("UserId: %+v", event.UserID)
 	log.Debug().Msgf("Channel: %+v", event.ChannelName)
 	log.Debug().Msgf("ChannelId: %+v", event.ChannelID)

@@ -2,7 +2,7 @@ name: Test & Validate
 
 on:
   pull_request:
-    types: ['synchronize', 'opened', 'reopened', 'ready_for_review']
+    types: ['synchronize', 'opened']
     branches:
     - main
 
@@ -28,7 +28,6 @@ jobs:
     # Because this step is part of the critical path, omission of this step will result in remaining CI steps not gettinge executed.
     # As of 8/8/2022 there is now way to enforce this beahvior in GitHub Actions CI.
       - run: exit 0
-
 
   linting:
     needs: [run-ci]

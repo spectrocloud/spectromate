@@ -1,3 +1,6 @@
+// Copyright (c) Spectro Cloud
+// SPDX-License-Identifier: Apache-2.0
+
 package internal
 
 import (
@@ -132,7 +135,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 	}
 
 	client := &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: DefaultMendableQueryTimeout,
 	}
 
 	request, err := http.NewRequest("POST", queryURL, bytes.NewBuffer(jsonData))
@@ -197,7 +200,7 @@ func retrieveUniqueLinks(list *[]MendableSources) []string {
 		link := source.Link
 
 		// Skip links that are equal to "https://docs.spectrocloud.com"
-		if link == "https://docs.spectrocloud.com" {
+		if link == PublicDocumentationURL {
 			continue
 		}
 
