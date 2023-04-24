@@ -8,7 +8,7 @@
 </p>
 
 
-## Overview 👩‍🚀 🧑🏿‍🚀 🧑‍🚀 
+## Overview 🧑🏿‍🚀 👩‍🚀 🧑‍🚀
 
 SpectroMate is an API server with extended functionality designed for Slack integration in the form of a bot. You can use SpectroMate to handle [slash commands](https://api.slack.com/interactivity/slash-commands), and [message actions](https://api.slack.com/reference/interaction-payloads). You can also use SpectroMate to handle non-slack-related events by creating API endpoints for other purposes. 
 
@@ -58,14 +58,14 @@ Spectromate supports the following actions.
 | Handles the negavtive feedback button and submits the feedback to Mendable.| `ask_model_negative_feedback` |
 
 
-## Architecture
+## Architecture 📐
 
 The following is an architectural overview of SpectroMate. 
 
 ![An architecture diagram with all the components that support SpectroMate](./static/images/infrastructure-architecture.png)
 
 
-## Supported Features and Limitations 📐
+## Supported Features and Limitations  🔍
 
 |Action| Supported | Notes |
 |---|---|---|
