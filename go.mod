@@ -7,7 +7,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/schema v1.2.0
 	github.com/redis/go-redis/v9 v9.0.3
-	github.com/rs/zerolog v1.29.0
+	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.7.2
 	go.uber.org/automaxprocs v1.5.2
 )
