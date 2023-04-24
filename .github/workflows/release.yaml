@@ -37,8 +37,8 @@ jobs:
 
       - id: tag
         run: |
-          echo "VERSION=$(svu next)" >> $GITHUB_OUTPUT
-          git tag "$(svu next)"
+          echo "VERSION=$(svu next --tag-mode all-branches)" >> $GITHUB_OUTPUT
+          git tag "$(svu next --tag-mode all-branches)"
           git push --tags
 
   goreleaser:
