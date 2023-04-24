@@ -21,9 +21,11 @@ init:
 	go install github.com/google/go-licenses@latest
 	~/go/bin/mockgen -source=internal/cache.go -destination=mock/mock_cache.go -package=mock
 
-license:
+opensource:
 	@echo "Checking license headers..."
 	~/go/bin/go-licenses report spectrocloud.com/spectromate --template=docs/open-source.tpl > docs/open-source.md 
 
 
-	
+license:
+	@echo "Applying license headers..."
+	 copywrite headers	

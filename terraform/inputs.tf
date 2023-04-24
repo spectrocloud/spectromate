@@ -1,3 +1,6 @@
+# Copyright (c) Spectro Cloud
+# SPDX-License-Identifier: Apache-2.0
+
 variable "project" {
   type        = string
   description = "The name of the Spectro Cloud project to use."

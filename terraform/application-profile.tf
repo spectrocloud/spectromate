@@ -1,3 +1,6 @@
+# Copyright (c) Spectro Cloud
+# SPDX-License-Identifier: Apache-2.0
+
 resource "spectrocloud_application_profile" "spectromate" {
   name        = "spectromate"
   description = "The Spectromate application profile."

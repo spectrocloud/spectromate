@@ -1,3 +1,6 @@
+# Copyright (c) Spectro Cloud
+# SPDX-License-Identifier: Apache-2.0
+
 FROM golang:1.20.3-alpine3.17 as builder
 
 LABEL org.opencontainers.image.source="http://spectrocloud.com/spectromate"
