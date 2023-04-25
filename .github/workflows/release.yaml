@@ -21,6 +21,7 @@ jobs:
     outputs:
       VERSION: ${{ steps.tag.outputs.VERSION }}
       PREV_VERSION: ${{ steps.tag.outputs.PREV_VERSION }}
+      SAME_VERSION: ${{ steps.tag.outputs.SAME_VERSION }}
 
     steps:
       - uses: actions/checkout@v3
@@ -42,11 +43,20 @@ jobs:
         run: |
           echo "VERSION=$(svu next --tag-mode all-branches)" >> $GITHUB_OUTPUT
           echo "PREV_VERSION=$(svu current --tag-mode all-branches)" >> $GITHUB_OUTPUT
-          git tag "$(svu next --tag-mode all-branches)"
-          git push --tags
+          if [ "$VERSION" = "$PREV_VERSION" ]; then
+            SAME_VERSION=true
+            echo "SAME_VERSION=true >> $GITHUB_OUTPUT
+          else
+            SAME_VERSION=false
+            echo "SAME_VERSION=false >> $GITHUB_OUTPUT
+            git tag "$(svu next --tag-mode all-branches)"
+            git push --tags
+          fi
+
 
   goreleaser:
     needs: [tag]
+    if: ${{ needs.tag.outputs.SAME_VERSION == 'true' }}
     runs-on: ubuntu-latest
     env:
       GORELEASER_CURRENT_TAG: ${{ needs.tag.outputs.VERSION }}

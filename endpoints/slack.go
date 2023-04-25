@@ -14,11 +14,6 @@ import (
 	"spectrocloud.com/spectromate/slackCmds"
 )
 
-// NewHandlerContext returns a new CounterRoute with a database connection.
-// func NewSlackHandlerContext(ctx context.Context, signingSecret, mendableApiKey string, r *redis.Client) *SlackRoute {
-// 	return &SlackRoute{ctx, signingSecret, mendableApiKey, &internal.SlackEvent{}, r}
-// }
-
 func NewSlackHandlerContext(ctx context.Context, signingSecret, mendableApiKey string, c internal.Cache) *SlackRoute {
 	return &SlackRoute{ctx, signingSecret, mendableApiKey, &internal.SlackEvent{}, c}
 }
@@ -73,7 +68,11 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 	}
 }
 
-// getHandler returns a health check response.
+// getHandler is the main handler for the Slack endpoint.
+// It determines which command was sent by the user and calls the appropriate function.
+// An initial response is sent back to Slack with a 200 status code to avoid the 3 second timeout.
+// A Go routine is used to call the command function so the response can be sent back to Slack
+// The Go routine is used so the response can be sent back to Slack without waiting for the command function to finish.
 func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request) ([]byte, error) {
 
 	var (
@@ -106,6 +105,9 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 
 	switch cmd {
 	case Help:
+		// The Help command does not need to be run in a Go routine.
+		// It's a simple command that just returns a string.
+		// The response is sent back to Slack immediately.
 		returnPayload, err = slackCmds.HelpCmd()
 		if err != nil {
 			internal.LogError(err)
@@ -127,6 +129,7 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 		}
 		// Reply back to slack with a 200 status code to avoid the 3 second timeout.
 		returnPayload = reply200Payload
+		// Start Go routine to call the command function.
 		go slackCmds.AskCmd(slackRequestInfo, false)
 	case PAsk:
 		slackRequestInfo := slackCmds.NewSlackAskRequest(
@@ -142,6 +145,7 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			return nil, err
 		}
 		returnPayload = reply200Payload
+		// Start Go routine to call the command function.
 		go slackCmds.AskCmd(slackRequestInfo, true)
 	default:
 		returnPayload, err = slackCmds.HelpCmd()
@@ -172,6 +176,8 @@ func determineCommand(input string) (SlackCommands, error) {
 	return cmd, nil
 }
 
+// checkAfterKeyword checks if there is anything after the keyword.
+// An error is returned if there is nothing after the keyword.
 func checkAfterKeyword(input string, keyword string) error {
 	// Split the input string by whitespace using strings.Fields
 	parts := strings.Fields(input)
