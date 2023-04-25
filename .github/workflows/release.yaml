@@ -43,10 +43,13 @@ jobs:
         run: |
           echo "VERSION=$(svu next --tag-mode all-branches)" >> $GITHUB_OUTPUT
           echo "PREV_VERSION=$(svu current --tag-mode all-branches)" >> $GITHUB_OUTPUT
+
           if [ "$VERSION" = "$PREV_VERSION" ]; then
+            echo "no new version detected"
             SAME_VERSION=true
             echo "SAME_VERSION=true >> $GITHUB_OUTPUT
           else
+            echo "new version detected"
             SAME_VERSION=false
             echo "SAME_VERSION=false >> $GITHUB_OUTPUT
             git tag "$(svu next --tag-mode all-branches)"
@@ -56,7 +59,7 @@ jobs:
 
   goreleaser:
     needs: [tag]
-    if: ${{ needs.tag.outputs.SAME_VERSION == 'true' }}
+    if: ${{ needs.tag.outputs.SAME_VERSION == 'false' }}
     runs-on: ubuntu-latest
     env:
       GORELEASER_CURRENT_TAG: ${{ needs.tag.outputs.VERSION }}
