@@ -84,7 +84,7 @@ make server
 
 13. Toggle the **Interactvity** button to **On**. 
 
-14. Use your Ngrok URL and past the URL into the text input box. Append `/api/v1/slack/actions` to the end of URL and save your changes.
+14. Use your Ngrok URL and paste the URL into the text input box. Append `/api/v1/slack/actions` to the end of the URL and save your changes.
 
     ![View of the interactivity options view](../static/images/slack_interactivity_view.png)
 

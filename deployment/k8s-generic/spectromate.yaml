@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spectromate
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: spectromate
+type: Opaque
+data:
+  redis-password: <REPLACE ME> # Replace with your own base64 encoded password
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: slack-signing-secret
+  namespace: spectromate
+type: Opaque
+data:
+  slack-signing-secret: <REPLACE ME> # Replace with your own base64 encoded Slack signing secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mendable-api-key
+  namespace: spectromate
+type: Opaque
+data:
+  mendable-api-key: <REPLACE ME> # Replace with your own base64 encoded api key
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: spectromate
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7.0.5-alpine3.17
+        ports:
+        - containerPort: 6379
+          name: redis
+        env:
+          - name: REDIS_USER
+            value: "default"
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-secret
+                key: redis-password
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "500m"
+          requests:
+            memory: "500Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: spectromate
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slackbot
+  namespace: spectromate
+spec:
+  selector:
+    matchLabels:
+      app: slackbot
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: slackbot
+    spec:
+      containers:
+      - name: slackbot
+        image: ghcr.io/spectrocloud/spectromate:v1.0.0
+        ports:
+        - containerPort: 3000
+          name: slackbot
+        env:
+        - name: SLACK_SIGNING_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: slack-signing-secret
+              key: slack-signing-secret
+        - name: MENDABLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: mendable-api-key
+              key: mendable-api-key
+        - name: REDIS_URL
+          value: "redis.spectromate.svc.cluster.local"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redis-password
+        - name: REDIS_USER
+          value: "default"
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "500m"
+          requests:
+            memory: "500Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slackbot
+  namespace: spectromate
+spec:
+  selector:
+    app: slackbot
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: LoadBalancer
