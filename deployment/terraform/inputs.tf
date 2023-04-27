@@ -31,33 +31,6 @@ variable "mendable_api_key" {
   sensitive   = true
 }
 
-variable "image_registry_name" {
-  type        = string
-  description = "The name of the image registry."
-  default     = "github-image-registry-private"
-}
-
-variable "image_registry_endpoint" {
-  type        = string
-  description = "The endpoint of the image registry."
-  default     = "ghcr.io"
-}
-
-
-variable "github_registry_username" {
-  type        = string
-  description = "The username for the image registry. Set using TF_VAR environment variable."
-  sensitive   = true
-}
-
-
-variable "github_registry_password" {
-  type        = string
-  description = "The password for the image registry. Set using TF_VAR environment variable."
-  sensitive   = true
-}
-
-
 variable "image" {
   type        = string
   description = "The Spectromate image to deploy."
@@ -82,17 +55,34 @@ variable "redis_database_volume_size" {
   default     = "8"
 }
 
-variable "redis_database_password" {
-  type        = string
-  description = "The password for the Redis database. Set using TF_VAR environment variable."
-}
-
-
 variable "trace_level" {
   type        = string
   description = "The trace level for the Spectromate application."
   default     = "DEBUG"
 }
+
+variable "cluster_resources" {
+  description = "The resources to allocate to the virtual cluster"
+  type = map(object({
+    max_cpu           = number
+    max_mem_in_mb     = number
+    min_cpu           = number
+    min_mem_in_mb     = number
+    max_storage_in_gb = string
+    min_storage_in_gb = string
+  }))
+  default = {
+    resources = {
+      max_cpu           = 4
+      max_mem_in_mb     = 4096
+      min_cpu           = 0
+      min_mem_in_mb     = 0
+      max_storage_in_gb = "4"
+      min_storage_in_gb = "0"
+    }
+  }
+}
+
 
 variable "tags" {
   type        = list(string)

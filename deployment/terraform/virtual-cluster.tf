@@ -6,12 +6,12 @@ resource "spectrocloud_virtual_cluster" "cluster-1" {
   cluster_group_uid = data.spectrocloud_cluster_group.beehive.id
 
   resources {
-    max_cpu           = 4
-    max_mem_in_mb     = 4096
-    min_cpu           = 0
-    min_mem_in_mb     = 0
-    max_storage_in_gb = "4"
-    min_storage_in_gb = "0"
+    max_cpu           = var.cluster_resources["resources"].max_cpu
+    max_mem_in_mb     = var.cluster_resources["resources"].max_mem_in_mb
+    min_cpu           = var.cluster_resources["resources"].min_cpu
+    min_mem_in_mb     = var.cluster_resources["resources"].min_mem_in_mb
+    max_storage_in_gb = var.cluster_resources["resources"].max_storage_in_gb
+    min_storage_in_gb = var.cluster_resources["resources"].min_storage_in_gb
   }
 
   tags = var.tags
