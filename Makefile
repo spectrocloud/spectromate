@@ -1,3 +1,5 @@
+.PHONY: license
+
 start:
 	@echo "Starting the application and ngrok..."
 	@docker compose up --detach
