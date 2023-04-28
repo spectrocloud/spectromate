@@ -62,33 +62,39 @@ To set up the local development support dependencies, such as Redis and Ngork, u
 
 6.  Start the local server.
 
-```shell
-make server
-```
+    ```shell
+    make server
+    ```
 
-7. Navigate to your [Slack app ](https://api.slack.com/apps) and open up your app's details page. 
+7. Source the `.env` file.
+
+    ```shell
+    source .env
+    ```
+
+8. Navigate to your [Slack app ](https://api.slack.com/apps) and open up your app's details page. 
 
 
-8. You will access both elements highlighted in the image. Start with the first element, by clicking on the left **Main Menu** and selecting **Slash Command**.
+9. You will access both elements highlighted in the image. Start with the first element, by clicking on the left **Main Menu** and selecting **Slash Command**.
 
     ![A view of the slack app details view](../static/images/slack_app_main_view.png)
 
-9. Create a new slash command titled `docs` and provide your Ngrok URL to the command. Append `/api/v1/slack` to the end of URL.
+10. Create a new slash command titled `docs` and provide your Ngrok URL to the command. Append `/api/v1/slack` to the end of URL.
 
     ![View of the Slack slash command page](../static/images/slack_slash_command.png)
 
-10. Save your changes and navigate back to the main details page.
+11. Save your changes and navigate back to the main details page.
 
 
-12. From the left **Main Menu**, select **Interactivity & Shortcuts**.
+13. From the left **Main Menu**, select **Interactivity & Shortcuts**.
 
-13. Toggle the **Interactvity** button to **On**. 
+14. Toggle the **Interactvity** button to **On**. 
 
-14. Use your Ngrok URL and paste the URL into the text input box. Append `/api/v1/slack/actions` to the end of the URL and save your changes.
+15. Use your Ngrok URL and paste the URL into the text input box. Append `/api/v1/slack/actions` to the end of the URL and save your changes.
 
     ![View of the interactivity options view](../static/images/slack_interactivity_view.png)
 
-15. Navigate to a Slack channel and issue the Slack command `/docs help`.
+16. Navigate to a Slack channel and issue the Slack command `/docs help`.
 
 
 You should receive an output similar to the following.
@@ -97,7 +103,7 @@ You should receive an output similar to the following.
 
 You now have a functional test application connected to your local workstation. 
 
-16. Stop the local server by pressing the `Ctrl` + `C`.
+17. Stop the local server by pressing the `Ctrl` + `C`.
 
 
 Make your changes and start the server with the `make server` command to test the new behavior. 
@@ -111,7 +117,6 @@ go run main.go
 {"level":"info","time":1682045055,"message":"Redis is configured for localhost:6379"}
 {"level":"info","time":1682045055,"message":"Trace level set to: INFO"}
 {"level":"info","time":1682045055,"message":"Starting server..."}
-
 
 ```
 
