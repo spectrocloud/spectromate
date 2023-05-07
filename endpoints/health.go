@@ -20,6 +20,13 @@ func (health *HealthRoute) HealthHTTPHandler(writer http.ResponseWriter, request
 	log.Debug().Msg("Health check request received.")
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
+
+	if request.Method != http.MethodGet {
+		log.Debug().Msg("Invalid method.")
+		http.Error(writer, "Invalid method.", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var payload []byte
 
 	value, err := health.getHandler(request)

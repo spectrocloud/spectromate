@@ -37,6 +37,12 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 	err := internal.SourceValidation(request.Context(), request, slack.signingSecret)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error validating Slack request signature.")
+		writer.WriteHeader(http.StatusForbidden)
+		_, err := writer.Write([]byte("Forbidden"))
+		if err != nil {
+			internal.LogError(err)
+			log.Error().Err(err).Msg("Error writing response to the Slack endpoint.")
+		}
 	}
 
 	var event internal.SlackEvent
