@@ -3,9 +3,6 @@
 
 FROM golang:1.20.3-alpine3.17 as builder
 
-LABEL org.opencontainers.image.source="http://spectrocloud.com/spectromate"
-LABEL org.opencontainers.image.description "An API server with features to support Slack bots integration."
-
 ARG VERSION
 
 ADD ./ /source
@@ -15,6 +12,10 @@ adduser -H -u 1002 -D -G appuser appuser && \
 go build -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=${VERSION}'" -o spectromate -v
 
 FROM alpine:latest
+
+LABEL org.opencontainers.image.source="http://spectrocloud.com/spectromate"
+LABEL org.opencontainers.image.description "An API server with features to support Slack bots integration."
+
 
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group

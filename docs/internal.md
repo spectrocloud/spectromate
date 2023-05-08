@@ -23,8 +23,6 @@ The application is structured as an API server using the standard library HTTP p
 
 For example, a consumer could create a new route that is used to generate an on-demand report specific to an internal business process, such as creating an inventory list or activating an internal process, such as adding a user to a platform or tool.
 
-SpectroMate is compiled and distributed as a multi-platform binary.
-
 SpectroMate is compiled and distributed as a multi-platform binary. The binary can be installed in a system and start-up without requiring the installation of software dependencies. SpectroMate is also distributed as a container image. The container image is the preferred consumption method as it lends itself nicely to modern infrastructure platforms supporting the deployment of containerized workloads. 
 
 # API Server
