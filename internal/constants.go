@@ -46,7 +46,7 @@ const (
 	// DefaultNoSourcesIdentifiedMessage is the default message for when no sources are identified.
 	DefaultNoSourcesIdentifiedMessage string = `:mag: Unable to identify a specific documentation URL.`
 	// DefaultUserAgent is the default user agent for the HTTP client.
-	DefaultUserAgent string = "spectromate"
+	DefaultUserAgent string = "SpectroMate"
 )
 
 // GetRandomWaitMessage returns a random wait message.
