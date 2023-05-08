@@ -12,18 +12,18 @@ import (
 	"spectrocloud.com/spectromate/internal"
 )
 
-type SlackActionRequest struct {
+type SlackActionFeedback struct {
 	ctx            context.Context
 	action         *internal.SlackActionEvent
 	mendableAPIKey string
 }
 
-// SlackActionRequest returns a new SlackActionRequest.
-func NewSlackActionRequest(ctx context.Context, action *internal.SlackActionEvent, mendableAPIKey string) *SlackActionRequest {
-	return &SlackActionRequest{ctx, action, mendableAPIKey}
+// SlackActionFeedback returns a new SlackActionFeedback.
+func NewSlackActionFeedback(ctx context.Context, action *internal.SlackActionEvent, mendableAPIKey string) *SlackActionFeedback {
+	return &SlackActionFeedback{ctx, action, mendableAPIKey}
 }
 
-func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.MendableRatingScore) {
+func ModelFeedbackHandler(action *SlackActionFeedback, ratingScore internal.MendableRatingScore) {
 
 	var (
 		globalErr *error
@@ -262,7 +262,7 @@ func rateFeedbackMarkdownPayload(content, question, links string, isPrivate bool
 	return payloadBytes, nil
 }
 
-func errorEval(ctx context.Context, e *error, a *SlackActionRequest, isPrivate bool) {
+func errorEval(ctx context.Context, e *error, a *SlackActionFeedback, isPrivate bool) {
 	if e != nil {
 		err := internal.ReplyWithErrorMessage(a.action.ResponseURL, isPrivate)
 		if err != nil {

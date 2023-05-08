@@ -62,7 +62,7 @@ func (actions *ActionsRoute) ActionsHTTPHandler(writer http.ResponseWriter, requ
 func (actions *ActionsRoute) getHandler(routeRequest *ActionsRoute, reqeust *http.Request, action *internal.SlackActionEvent) ([]byte, error) {
 	var returnPayload []byte
 
-	slackRequestInfo := slackActions.NewSlackActionRequest(routeRequest.ctx, action, routeRequest.mendableApiKey)
+	slackRequestInfo := slackActions.NewSlackActionFeedback(routeRequest.ctx, action, routeRequest.mendableApiKey)
 
 	switch action.Actions[0].ActionID {
 

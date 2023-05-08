@@ -26,7 +26,7 @@ Palette's PDE simplifies the deployment and management of SpectroMate. You can d
 
 ## Getting Started 🚀
 
-To get started with Spectromate checkout the [Getting Started](./docs/getting-started.md) guide.
+To get started with Spectromate check out the [Getting Started](./docs/getting-started.md) guide.
 
 ---
 
@@ -67,6 +67,9 @@ Spectromate supports the following actions.
 The following is an architectural overview of SpectroMate. 
 
 ![An architecture diagram with all the components that support SpectroMate](./static/images/infrastructure-architecture.png)
+
+
+To learn more about SpectroMate, review the [internal](./docs/internal.md) technical document.
 
 
 ## Supported Features and Limitations  🔍

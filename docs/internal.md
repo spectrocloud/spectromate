@@ -9,9 +9,8 @@ The following topics will be covered in detail.
 - [Routes](#routes)
     - [Health](#health)
     - [Commands](#commands)
-    - Actions
-    - Cache
-- Go Types
+    - [Actions](#actions)
+- [Cache](#cache)
 
 
 # Overview
@@ -32,9 +31,25 @@ SpectroMate is compiled and distributed as a multi-platform binary. The binary c
 
 SpectroMate's entry point is found in the **main.go** file. The API server is initialized using the `init()` function. The init function sets up the cache network connection, and it's also used to gather all environment variables applicable to the application, such as the cache connection URL or the log output level.
 
+## Environment Variables
+
+The following environment variables are available:
+
+| Variable | Description | Required | Default |
+|---|---|---|---|
+| `TRACE`| Set the debug level output. Available values are `INFO`, `DEBUG`, `TRACE`. | No| `INFO`|
+| `SLACK_SIGNING_SECRET` | The Slack application has a unique signing secret. This value is used to validate the request is originating from the Slack application. | Yes | `""`|
+| `MENDABLE_API_KEY` | The client API used to authenticate with the Mendable API. | Yes| `""`|
+| `REDIS_TLS`| Enable to require TLS when communicating with the Redis server| No | `false`|
+| `PORT` | Specify the network port for the SpectroMate server to listen on.| No| `3000`|
+| `HOST`| Specify the network interface the SpectroMate server should listen on. | No | `0.0.0.0`|
+| `REDIS_URL` | The URL of the Redis server.| No| `localhost`|
+| `REDIS_PASSWORD`| The password of the Redis user.| No | `""`|
+| `REDIS_USER`| The username of the Redis user to use for all Redis interactions.| No| `""`|
+
 In the `main()` function, the HTTP server is started by using the `http.ListenAndServe()` function. Before starting the HTTP server, all routes and their respective handler are declared and added to the API server. 
 
-In the following code snippet, three routes are declared. The endpoints are `/health` , `/slack`, a `/slack/actions`. 
+In the following code snippet, three routes are declared. The endpoints are `/health` , `/slack`, `/slack/actions`. 
 
 ```go
     healthRoute := endpoints.NewHealthHandlerContext(ctx)
@@ -103,6 +118,15 @@ The route handler function is a common pattern across all routes, and it's where
 
 The command route has some string logic to extract the Slack sub-command. For example, users can define multiple Slack commands such as `/docs ask` or `/docs pask` by using the second argument as the command identifies. The core command is the application's entry point, and the sub-commands are how additional functionality is exposed. 
 
+Once the sub-command is extracted from the Slack payload, the command string value is validated to ensure a valid command was provided. The return value is a type value of the Slack sub-command.
+
+```go
+    cmd, err := determineCommand(userCmd)
+    if err != nil {
+        log.Debug().Msg("Error converting string to SlackCommands type.")
+    }
+```
+
 You must define each command as a type. If you are adding new Slack command, define the new command in the **endpoints/type.go** file. Start by adding a new const value for your route.
 
 For example, assume you are adding a new command titled "coffee". The first step is to add a const titled `Coffee`
@@ -114,7 +138,7 @@ const (
     Help SlackCommands = iota
     Ask
     PAsk
-   Coffee
+    Coffee
 )
 ```
 Next, update the SlackCommands's string function to convert the type to a string value and vice versa.
@@ -160,16 +184,16 @@ In the file **endpoints/slack.go**. The Slack endpoint's switch statement routes
     case Ask:
         slackRequestInfo := slackCmds.NewSlackAskRequest(
             slack.ctx,
-            slack.SlackEvent,
+            Slack.SlackEvent,
             slack.mendableApiKey,
-            slack.cache,
+            Slack.cache,
         )
         reply200Payload, err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, false)
         if err != nil {
             log.Info().Err(err).Msg("failed to reply to slack with status 200.")
             return nil, err
         }
-        // Reply back to slack with a 200 status code to avoid the 3 second timeout.
+        // Reply back to Slack with a 200 status code to avoid the 3 second timeout.
         returnPayload = reply200Payload
         // Start Go routine to call the command function.
         go slackCmds.AskCmd(slackRequestInfo, false)
@@ -177,7 +201,7 @@ In the file **endpoints/slack.go**. The Slack endpoint's switch statement routes
 }
 ```
 
-The `slackCmds.AskCmd()` function is invoked to start a Go routine so that the logic required for the command can continue without being limited to the current request-reply, which is used to reply back with an HTTP status code of 200 to address the Slack timeout requirement. This design also allows multiple requests to be handled by the available CPU cores in the system to improve performance. 
+The `slackCmds.AskCmd()` function is invoked to start a Go routine so that the logic required for the command can continue without being limited to the current request-reply, which is used to reply with an HTTP status code of 200 to address the Slack timeout requirement. This design also allows multiple requests to be handled by the available CPU cores in the system to improve performance. 
 
 If you add a new slack command, add a new case to the switch statement and handle the logic accordingly.
 
@@ -202,3 +226,63 @@ If you add a new slack command, add a new case to the switch statement and handl
 ```
 
 Notice how the `CoffeeCmd()` function and the other commands are sourced from the `slackCmds` package. The `slackCmds` package is sourced from the [**slackCmds**](../slackCmds/) folder, containing the core logic for each command. All new commands must have their own logic file in the **slackCmds** folder.
+
+# Actions
+
+Endpoint: `/slack/actions/`
+
+The actions endpoint supports Slack [application interactions](https://api.slack.com/interactivity#responses). The actions endpoint accepts HTTP POST requests and requires Slack signature secret verification. 
+
+The actions route handler is located in the **endpoints/slack-actions.go**. The internal route handler uses the action identifier to route the request to the appropriate action logic function. 
+
+```go
+// getHandler invokes the modelFeedbackHandler function from the slackActions package
+func (actions *ActionsRoute) getHandler(routeRequest *ActionsRoute, reqeust *http.Request, action *internal.SlackActionEvent) ([]byte, error) {
+    var returnPayload []byte
+
+    slackRequestInfo := slackActions.NewSlackActionFeedback(routeRequest.ctx, action, routeRequest.mendableApiKey)
+
+    switch action.Actions[0].ActionID {
+
+    case internal.ActionsAskModelPositiveFeedbackID:
+        log.Debug().Msg("Positive feedback action triggered.")
+        go slackActions.ModelFeedbackHandler(slackRequestInfo, internal.PositiveFeedbackScore)
+    case internal.ActionsAskModelNegativeFeedbackID:
+        log.Debug().Msg("Negative feedback action triggered.")
+        go slackActions.ModelFeedbackHandler(slackRequestInfo, internal.NegativeFeedbackScore)
+    default:
+        log.Debug().Msg("Unknown action.")
+    }
+
+    return returnPayload, nil
+
+}
+```
+The action identifier is defined in the **internal/constants.go** file.
+```go
+    ActionsAskModelPositiveFeedbackID string = "ask_model_positive_feedback"
+    // ActionsAskModelNegativeFeedbackID is the ID for the negative feedback action.
+    ActionsAskModelNegativeFeedbackID string = "ask_model_negative_feedback"
+```
+The action identifier is an application-defined value that can be applied to a Slack message. For example, the Mendable ask, and pask command includes the action identifier in the return message and embeds the ID in the message's buttons. When a Slack user clicks on the feedback button, the respective action identifier is included in the Slack action event payload. 
+
+To create a new action handler, create a new action logic file in the **slackActions** folder. In the new route, ensure to create an action route type.
+
+For example, if creating an action called "coffeeRating", create a new action type.
+
+```go
+type SlackActionCoffeeRating struct {
+	ctx            context.Context
+	action         *internal.SlackActionEvent
+}
+```
+
+An action type also requires an action handler. The action handler is where the core logic of the action resides.
+
+```go
+func CoffeeRatingHandler(action *SlackActionFeedback, ratingScore internal.MendableRatingScore) {
+    ... # Your logic here
+}
+```
+
+# Cache
