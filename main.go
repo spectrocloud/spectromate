@@ -30,6 +30,7 @@ var (
 	globalHostURL        string = globalHost + ":" + globalPort
 	globalSigningSecret  string
 	globalMendableAPIKey string
+	Version              string
 )
 
 func init() {
@@ -82,18 +83,20 @@ func init() {
 func main() {
 	ctx := context.Background()
 	rdb := globalRedisClient
-	healthRoute := endpoints.NewHealthHandlerContext(ctx)
-	slackRoute := endpoints.NewSlackHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, rdb)
-	slackActionsRoute := endpoints.NewActionsHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey)
+	healthRoute := endpoints.NewHealthHandlerContext(ctx, Version)
+	slackRoute := endpoints.NewSlackHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, rdb, Version)
+	slackActionsRoute := endpoints.NewActionsHandlerContext(ctx, globalSigningSecret, globalMendableAPIKey, Version)
 
 	http.HandleFunc(internal.ApiPrefixV1+"health", healthRoute.HealthHTTPHandler)
 	http.HandleFunc(internal.ApiPrefixV1+"slack", slackRoute.SlackHTTPHandler)
 	http.HandleFunc(internal.ApiPrefixV1+"slack/actions", slackActionsRoute.ActionsHTTPHandler)
 
 	log.Info().Msgf("Server is configured for port %s and listing on %s", globalPort, globalHostURL)
+	log.Info().Msgf("API Server version:  v%s", Version)
 	log.Info().Msgf("Redis is configured for %s:%d", globalRedisURL, globalRedisPort)
 	log.Info().Msgf("Trace level set to: %s", globalTraceLevel)
 	log.Info().Msg("Starting server...")
+	http.DefaultClient = internal.DefaultHTTPClient()
 	err := http.ListenAndServe(globalHostURL, nil)
 	if err != nil {
 		log.Fatal().Err(err).Msg("There's an error with the server")

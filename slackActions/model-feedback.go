@@ -16,11 +16,12 @@ type SlackActionFeedback struct {
 	ctx            context.Context
 	action         *internal.SlackActionEvent
 	mendableAPIKey string
+	version        string
 }
 
 // SlackActionFeedback returns a new SlackActionFeedback.
-func NewSlackActionFeedback(ctx context.Context, action *internal.SlackActionEvent, mendableAPIKey string) *SlackActionFeedback {
-	return &SlackActionFeedback{ctx, action, mendableAPIKey}
+func NewSlackActionFeedback(ctx context.Context, action *internal.SlackActionEvent, mendableAPIKey, version string) *SlackActionFeedback {
+	return &SlackActionFeedback{ctx, action, mendableAPIKey, version}
 }
 
 func ModelFeedbackHandler(action *SlackActionFeedback, ratingScore internal.MendableRatingScore) {
@@ -52,7 +53,7 @@ func ModelFeedbackHandler(action *SlackActionFeedback, ratingScore internal.Mend
 		return
 	}
 
-	err = internal.SendModelRating(action.ctx, messageID, ratingScore, action.mendableAPIKey, internal.MendableRatingFeedbackURL)
+	err = internal.SendModelRating(action.ctx, messageID, ratingScore, action.mendableAPIKey, internal.MendableRatingFeedbackURL, action.version)
 	if err != nil {
 		log.Debug().Err(err).Msg("error sending model feedback.")
 		internal.LogError(err)

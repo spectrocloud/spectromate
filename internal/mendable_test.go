@@ -68,6 +68,7 @@ func TestCreateNewConversation(t *testing.T) {
 }
 
 func TestSendDocsQuery(t *testing.T) {
+	var version string = "1.0.0"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := MendablePayload{
@@ -121,7 +122,7 @@ func TestSendDocsQuery(t *testing.T) {
 	defer cancel()
 
 	// Call the SendDocsQuery function
-	result, err := SendDocsQuery(ctx, testQuery, ts.URL)
+	result, err := SendDocsQuery(ctx, testQuery, ts.URL, version)
 	if err != nil {
 		t.Fatalf("SendDocsQuery returned an error: %v", err)
 	}

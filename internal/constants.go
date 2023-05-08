@@ -45,6 +45,8 @@ const (
 	DefaultNegativeRatingMessage string = `Thank you for providing the :thumbsdown: feedback!`
 	// DefaultNoSourcesIdentifiedMessage is the default message for when no sources are identified.
 	DefaultNoSourcesIdentifiedMessage string = `:mag: Unable to identify a specific documentation URL.`
+	// DefaultUserAgent is the default user agent for the HTTP client.
+	DefaultUserAgent string = "spectromate"
 )
 
 // GetRandomWaitMessage returns a random wait message.
@@ -64,4 +66,15 @@ func GetRandomWaitMessage() string {
 	}
 
 	return waitMessages[rand.Intn(len(waitMessages))]
+}
+
+// GetUserAgentString returns the user agent for the HTTP client.
+func GetUserAgentString(version *string) string {
+
+	if version != nil {
+		return DefaultUserAgent + "/v" + *version
+	}
+
+	return DefaultUserAgent
+
 }

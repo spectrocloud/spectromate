@@ -11,7 +11,8 @@ import (
 )
 
 type HealthRoute struct {
-	ctx context.Context
+	ctx     context.Context
+	Version string
 }
 
 type SlackRoute struct {
@@ -20,6 +21,7 @@ type SlackRoute struct {
 	mendableApiKey string
 	SlackEvent     *internal.SlackEvent
 	cache          internal.Cache
+	Version        string
 }
 
 type ActionsRoute struct {
@@ -27,6 +29,7 @@ type ActionsRoute struct {
 	signingSecret  string
 	mendableApiKey string
 	ActionsEvent   *internal.SlackActionEvent
+	Version        string
 }
 
 type SlackCommands int

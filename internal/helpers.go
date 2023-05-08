@@ -4,6 +4,7 @@
 package internal
 
 import (
+	"net/http"
 	"os"
 	"strconv"
 
@@ -26,4 +27,19 @@ func StringToInt64(s string) int64 {
 		log.Fatal().Err(err).Msgf("Error converting %s string to int64", s)
 	}
 	return i
+}
+
+// DefaultHTTPClient returns a default HTTP client with proxy support.
+func DefaultHTTPClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+		},
+	}
+}
+
+// SetUserAgent sets the User-Agent header on the request.
+func SetUserAgent(version string) string {
+
+	return DefaultUserAgent + version
 }

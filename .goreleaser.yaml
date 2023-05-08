@@ -7,6 +7,7 @@ before:
     - go generate ./...
     - go vet ./...
 builds:
+  - ldflags: "-s -w -X main.version={{.Version}}"
   - env:
       - CGO_ENABLED=0
     goos:

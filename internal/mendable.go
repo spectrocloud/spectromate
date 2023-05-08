@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -36,9 +35,7 @@ func CreateNewConversation(ctx context.Context, apiKey, apiURL string) (int64, e
 
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
+	client := DefaultHTTPClient()
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -62,7 +59,7 @@ func CreateNewConversation(ctx context.Context, apiKey, apiURL string) (int64, e
 }
 
 // SendModelRating sends the model rating to Mendable.
-func SendModelRating(ctx context.Context, messageID int, rateScore MendableRatingScore, apiKey, apiURL string) error {
+func SendModelRating(ctx context.Context, messageID int, rateScore MendableRatingScore, apiKey, apiURL, version string) error {
 
 	requestBody := MendableModelRatingFeedback{
 		ApiKey:    apiKey,
@@ -83,10 +80,8 @@ func SendModelRating(ctx context.Context, messageID int, rateScore MendableRatin
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
+	req.Header.Set("User-Agent", GetUserAgentString(&version))
+	client := DefaultHTTPClient()
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -114,7 +109,7 @@ func SendModelRating(ctx context.Context, messageID int, rateScore MendableRatin
 }
 
 // sendDocsQuery sends a query to Mendable and returns the response.
-func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL string) (MendableQueryResponse, error) {
+func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL, version string) (MendableQueryResponse, error) {
 
 	var mendableResponse MendableQueryResponse
 
@@ -134,9 +129,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 		return mendableResponse, err
 	}
 
-	client := &http.Client{
-		Timeout: DefaultMendableQueryTimeout,
-	}
+	client := DefaultHTTPClient()
 
 	request, err := http.NewRequest("POST", queryURL, bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -144,7 +137,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL s
 		LogError(err)
 		return mendableResponse, err
 	}
-
+	request.Header.Set("User-Agent", SetUserAgent(version))
 	request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
 	if err != nil {

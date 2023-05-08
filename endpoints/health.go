@@ -9,17 +9,19 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog/log"
+	"spectrocloud.com/spectromate/internal"
 )
 
 // NewHandlerContext returns a new CounterRoute with a database connection.
-func NewHealthHandlerContext(ctx context.Context) *HealthRoute {
-	return &HealthRoute{ctx}
+func NewHealthHandlerContext(ctx context.Context, version string) *HealthRoute {
+	return &HealthRoute{ctx, version}
 }
 
 func (health *HealthRoute) HealthHTTPHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Debug().Msg("Health check request received.")
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("User-Agent", internal.GetUserAgentString(&health.Version))
 
 	if request.Method != http.MethodGet {
 		log.Debug().Msg("Invalid method.")

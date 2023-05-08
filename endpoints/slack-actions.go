@@ -13,14 +13,15 @@ import (
 )
 
 // NewHandlerContext returns a new CounterRoute with a database connection.
-func NewActionsHandlerContext(ctx context.Context, signingSecret, mendableApiKey string) *ActionsRoute {
-	return &ActionsRoute{ctx, signingSecret, mendableApiKey, &internal.SlackActionEvent{}}
+func NewActionsHandlerContext(ctx context.Context, signingSecret, mendableApiKey, version string) *ActionsRoute {
+	return &ActionsRoute{ctx, signingSecret, mendableApiKey, &internal.SlackActionEvent{}, version}
 }
 
 func (actions *ActionsRoute) ActionsHTTPHandler(writer http.ResponseWriter, request *http.Request) {
 	log.Debug().Msg("Health check request received.")
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("User-Agent", internal.GetUserAgentString(&actions.Version))
 	var payload []byte
 
 	if request.Method != http.MethodPost {
@@ -32,7 +33,13 @@ func (actions *ActionsRoute) ActionsHTTPHandler(writer http.ResponseWriter, requ
 	// Validate the request signature came from the Spectro Cloud Slack app.
 	err := internal.SourceValidation(actions.ctx, request, actions.signingSecret)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error validating Slack request signature.")
+		log.Fatal().Err(err).Msg("Error validating Slack request signature.")
+		writer.WriteHeader(http.StatusForbidden)
+		_, err := writer.Write([]byte("Forbidden"))
+		if err != nil {
+			internal.LogError(err)
+			log.Error().Err(err).Msg("Error writing response to the Slack endpoint.")
+		}
 	}
 
 	var event internal.SlackActionEvent
@@ -62,7 +69,7 @@ func (actions *ActionsRoute) ActionsHTTPHandler(writer http.ResponseWriter, requ
 func (actions *ActionsRoute) getHandler(routeRequest *ActionsRoute, reqeust *http.Request, action *internal.SlackActionEvent) ([]byte, error) {
 	var returnPayload []byte
 
-	slackRequestInfo := slackActions.NewSlackActionFeedback(routeRequest.ctx, action, routeRequest.mendableApiKey)
+	slackRequestInfo := slackActions.NewSlackActionFeedback(routeRequest.ctx, action, routeRequest.mendableApiKey, actions.Version)
 
 	switch action.Actions[0].ActionID {
 

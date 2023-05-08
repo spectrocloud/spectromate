@@ -19,10 +19,11 @@ type SlackAskRequest struct {
 	slackEvent     *internal.SlackEvent
 	mendableAPIKey string
 	cache          internal.Cache
+	version        string
 }
 
-func NewSlackAskRequest(ctx context.Context, slackEvent *internal.SlackEvent, mendableAPIKey string, cache internal.Cache) *SlackAskRequest {
-	return &SlackAskRequest{ctx, slackEvent, mendableAPIKey, cache}
+func NewSlackAskRequest(ctx context.Context, slackEvent *internal.SlackEvent, mendableAPIKey string, cache internal.Cache, version string) *SlackAskRequest {
+	return &SlackAskRequest{ctx, slackEvent, mendableAPIKey, cache, version}
 }
 
 // The ask command is used to ask a question about the docs.
@@ -88,7 +89,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 			ShouldStream:   false,
 		}
 
-		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL)
+		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL, s.version)
 		if err != nil {
 			internal.LogError(err)
 			globalErr = &err
@@ -130,7 +131,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 			ShouldStream:   false,
 		}
 
-		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL)
+		mendableResponse, err = internal.SendDocsQuery(s.ctx, questionRequestItem, internal.MendableChatQueryURL, s.version)
 		if err != nil {
 			log.Debug().Err(err).Msgf("Error sending question to Mendable: %+v", s.slackEvent)
 			internal.LogError(err)

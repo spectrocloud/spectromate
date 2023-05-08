@@ -9,7 +9,7 @@ ADD ./ /source
 RUN cd /source && \
 addgroup -g 1002 appuser && \
 adduser -H -u 1002 -D -G appuser appuser && \
-go build -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=${VERSION}'" -o spectromate -v
+go build -ldflags="-X 'main.Version=${VERSION}'" -o spectromate -v
 
 FROM alpine:latest
 
