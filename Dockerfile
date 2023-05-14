@@ -14,7 +14,7 @@ go build -ldflags="-X 'main.Version=${VERSION}'" -o spectromate -v
 FROM alpine:latest
 
 LABEL org.opencontainers.image.source="http://spectrocloud.com/spectromate"
-LABEL org.opencontainers.image.description "An API server with features to support Slack bots integration."
+LABEL org.opencontainers.image.description "Spectromate is an API server with features to support Slack bot integration."
 
 
 COPY --from=builder /etc/passwd /etc/passwd
