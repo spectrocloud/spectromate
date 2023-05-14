@@ -6,9 +6,10 @@ before:
     - go mod tidy
     - go generate ./...
     - go vet ./...
+
 builds:
   - ldflags: "-s -w -X main.version={{.Version}}"
-  - env:
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -28,12 +29,15 @@ archives:
       {{- if .Arm }}v{{ .Arm }}{{ end }}
       _{{ .Tag }}
     format_overrides:
-    - goos: windows
-      format: zip
+      - goos: windows
+        format: zip
+
 checksum:
   name_template: 'checksums.txt'
+
 snapshot:
   name_template: "{{ incpatch .Version }}"
+
 changelog:
   sort: asc
   filters:
@@ -42,8 +46,3 @@ changelog:
       - '^test:'
       - '^chore:'
       - '^ci:'
-
-# The lines beneath this are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/use them.
-# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
-# vim: set ts=2 sw=2 tw=0 fo=cnqoj
