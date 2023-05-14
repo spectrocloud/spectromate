@@ -10,7 +10,7 @@ resource "spectrocloud_application_profile" "spectromate" {
     type            = data.spectrocloud_pack_simple.redis_service.type
     source_app_tier = data.spectrocloud_pack_simple.redis_service.id
     properties = {
-      "userPassword"    = base64encode(var.redis_database_password)
+      "userPassword"    = base64encode(random_password.password.result)
       "redisVolumeSize" = var.redis_database_volume_size
     }
     values = templatefile("manifests/redis.yaml", {})
@@ -28,10 +28,4 @@ resource "spectrocloud_application_profile" "spectromate" {
     })
   }
   tags = var.tags
-
-  lifecycle {
-    ignore_changes = [
-      pack,
-    ]
-  }
 }

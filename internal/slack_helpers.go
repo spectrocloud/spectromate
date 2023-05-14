@@ -184,7 +184,7 @@ func ReplyWithAnswer(responseURL string, payload []byte, isPrivate bool) error {
 	// This is to prevent the function from failing if Slack is slow to respond.
 	err := retry.Do(
 		func() error {
-			client := &http.Client{}
+			client := DefaultHTTPClient()
 			req, err := http.NewRequest("POST", responseURL, bytes.NewBuffer(payload))
 			if err != nil {
 				log.Debug().Err(err).Msg("error creating the reply back HTTP request")
@@ -242,7 +242,7 @@ func ReplyWithErrorMessage(responseURL string, isPrivate bool) error {
 	// This is to prevent the function from failing if Slack is slow to respond.
 	err = retry.Do(
 		func() error {
-			client := &http.Client{}
+			client := DefaultHTTPClient()
 			req, err := http.NewRequest("POST", responseURL, bytes.NewBuffer(clientMessage))
 			if err != nil {
 				log.Debug().Err(err).Msg("error creating the reply back HTTP request")

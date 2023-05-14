@@ -12,17 +12,21 @@
 
 SpectroMate is an API server with extended functionality designed for Slack integration in the form of a bot. You can use SpectroMate to handle [slash commands](https://api.slack.com/interactivity/slash-commands), and [message actions](https://api.slack.com/reference/interaction-payloads). You can also use SpectroMate to handle non-slack-related events by creating API endpoints for other purposes. 
 
-SpectroMate comes with out-of-the-box support for [Mendable](https://www.mendable.ai/) integration with Slack. You can use your Mendable-trained model to answer documentation-related questions by providing SpectroMate with your Mendable API key.  
+SpectroMate comes with out-of-the-box support for [Mendable](https://www.mendable.ai/). You can use your Mendable-trained model to answer documentation-related questions by using the `/docs ask <question>` slash command.
+
+  ![](./static/images/slack_command_issued.png)
 
   ![Example of a Slack question asked to Mendable](./static/images/mendable_ask_example.png)
 
-SpectroMate is designed for deployment in [Palette](https://console.spectrocloud.com) using the Palette Dev Engine (PDE) platform. Palette's PDE simplifies the deployment and management of SpectroMate. You can deploy SpectroMate to Palette and use the [free-tier resources](https://docs.spectrocloud.com/getting-started/palette-freemium). With Palette PDE, you can deploy SpectroMate at no cost and in under five minutes! Check out the [Getting Started](./docs/getting-started.md) guide to learn more.
+SpectroMate is optimized for deployment in [Palette](https://console.spectrocloud.com) using Palette's Dev Engine (PDE) platform. 
+
+Palette's PDE simplifies the deployment and management of SpectroMate. You can deploy SpectroMate to Palette and use the [free-tier resources](https://docs.spectrocloud.com/getting-started/palette-freemium). With Palette PDE, you can deploy SpectroMate at no cost and in under five minutes! Check out the [Getting Started](./docs/getting-started.md) guide to learn more.
 
 ---
 
 ## Getting Started 🚀
 
-To get started with Spectromate follow the steps outlined in the [Getting Started](./docs/getting-started.md) guide.
+To get started with Spectromate check out the [Getting Started](./docs/getting-started.md) guide.
 
 ---
 
@@ -63,6 +67,9 @@ Spectromate supports the following actions.
 The following is an architectural overview of SpectroMate. 
 
 ![An architecture diagram with all the components that support SpectroMate](./static/images/infrastructure-architecture.png)
+
+
+To learn more about SpectroMate, review the [internal](./docs/internal.md) technical document.
 
 
 ## Supported Features and Limitations  🔍

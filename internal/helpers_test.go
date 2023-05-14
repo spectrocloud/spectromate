@@ -44,3 +44,19 @@ func TestStringToInt64(t *testing.T) {
 		t.Errorf("StringToInt64(%q) = %d; expected %d", s1, result1, expected1)
 	}
 }
+
+func TestSetUserAgent(t *testing.T) {
+	// Test with version "1.0"
+	result := SetUserAgent("1.0")
+	expected := DefaultUserAgent + "1.0"
+	if result != expected {
+		t.Errorf("SetUserAgent returned %q, expected %q", result, expected)
+	}
+
+	// Test with version "2.0"
+	result = SetUserAgent("2.0")
+	expected = DefaultUserAgent + "2.0"
+	if result != expected {
+		t.Errorf("SetUserAgent returned %q, expected %q", result, expected)
+	}
+}

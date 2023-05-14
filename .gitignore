@@ -28,3 +28,4 @@ spectromate
 backend.tf
 redis/
 dist/
+*.config

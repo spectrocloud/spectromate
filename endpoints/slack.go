@@ -14,13 +14,14 @@ import (
 	"spectrocloud.com/spectromate/slackCmds"
 )
 
-func NewSlackHandlerContext(ctx context.Context, signingSecret, mendableApiKey string, c internal.Cache) *SlackRoute {
-	return &SlackRoute{ctx, signingSecret, mendableApiKey, &internal.SlackEvent{}, c}
+func NewSlackHandlerContext(ctx context.Context, signingSecret, mendableApiKey string, c internal.Cache, version string) *SlackRoute {
+	return &SlackRoute{ctx, signingSecret, mendableApiKey, &internal.SlackEvent{}, c, version}
 }
 
 func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("User-Agent", internal.GetUserAgentString(&slack.Version))
 
 	if request.Method != http.MethodPost {
 		log.Debug().Msg("Invalid method used for Slack endpoint.")
@@ -37,6 +38,12 @@ func (slack *SlackRoute) SlackHTTPHandler(writer http.ResponseWriter, request *h
 	err := internal.SourceValidation(request.Context(), request, slack.signingSecret)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error validating Slack request signature.")
+		writer.WriteHeader(http.StatusForbidden)
+		_, err := writer.Write([]byte("Forbidden"))
+		if err != nil {
+			internal.LogError(err)
+			log.Error().Err(err).Msg("Error writing response to the Slack endpoint.")
+		}
 	}
 
 	var event internal.SlackEvent
@@ -120,6 +127,7 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			slack.SlackEvent,
 			slack.mendableApiKey,
 			slack.cache,
+			slack.Version,
 		)
 
 		reply200Payload, err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, false)
@@ -137,6 +145,7 @@ func (slack *SlackRoute) getHandler(writer http.ResponseWriter, r *http.Request)
 			slack.SlackEvent,
 			slack.mendableApiKey,
 			slack.cache,
+			slack.Version,
 		)
 		// Reply back to slack with a 200 status code to avoid the 3 second timeout.
 		reply200Payload, err := internal.ReplyStatus200(slack.SlackEvent.ResponseURL, writer, true)

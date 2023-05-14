@@ -25,7 +25,7 @@ func HelpCmd() ([]byte, error) {
 
 // // createMarkdownPayload creates a Slack payload with a markdown block
 func helpMarkdownPayload(content, title string) ([]byte, error) {
-	log.Info().Msgf("Incoming Message: %v", content)
+	log.Debug().Msgf("Incoming Message: %v", content)
 
 	payload := internal.SlackPayload{
 		ResponseType: "ephemeral",

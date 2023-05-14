@@ -12,18 +12,19 @@ import (
 	"spectrocloud.com/spectromate/internal"
 )
 
-type SlackActionRequest struct {
+type SlackActionFeedback struct {
 	ctx            context.Context
 	action         *internal.SlackActionEvent
 	mendableAPIKey string
+	version        string
 }
 
-// SlackActionRequest returns a new SlackActionRequest.
-func NewSlackActionRequest(ctx context.Context, action *internal.SlackActionEvent, mendableAPIKey string) *SlackActionRequest {
-	return &SlackActionRequest{ctx, action, mendableAPIKey}
+// SlackActionFeedback returns a new SlackActionFeedback.
+func NewSlackActionFeedback(ctx context.Context, action *internal.SlackActionEvent, mendableAPIKey, version string) *SlackActionFeedback {
+	return &SlackActionFeedback{ctx, action, mendableAPIKey, version}
 }
 
-func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.MendableRatingScore) {
+func ModelFeedbackHandler(action *SlackActionFeedback, ratingScore internal.MendableRatingScore) {
 
 	var (
 		globalErr *error
@@ -52,7 +53,7 @@ func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.Menda
 		return
 	}
 
-	err = internal.SendModelRating(action.ctx, messageID, ratingScore, action.mendableAPIKey, internal.MendableRatingFeedbackURL)
+	err = internal.SendModelRating(action.ctx, messageID, ratingScore, action.mendableAPIKey, internal.MendableRatingFeedbackURL, action.version)
 	if err != nil {
 		log.Debug().Err(err).Msg("error sending model feedback.")
 		internal.LogError(err)
@@ -113,7 +114,7 @@ func ModelFeedbackHandler(action *SlackActionRequest, ratingScore internal.Menda
 		return
 	}
 
-	log.Info().Msg("Successfully sent the answer back to Slack.")
+	log.Debug().Msg("Successfully sent the answer back to Slack.")
 
 }
 
@@ -172,7 +173,7 @@ func replyWithEmptyMessage(isPrivate bool, rating internal.MendableRatingScore) 
 }
 
 func rateFeedbackMarkdownPayload(content, question, links string, isPrivate bool, rating internal.MendableRatingScore) ([]byte, error) {
-	log.Info().Msgf("Incoming Message: %v", content)
+	log.Debug().Msgf("Incoming Message: %v", content)
 
 	var (
 		responseType    string
@@ -262,7 +263,7 @@ func rateFeedbackMarkdownPayload(content, question, links string, isPrivate bool
 	return payloadBytes, nil
 }
 
-func errorEval(ctx context.Context, e *error, a *SlackActionRequest, isPrivate bool) {
+func errorEval(ctx context.Context, e *error, a *SlackActionFeedback, isPrivate bool) {
 	if e != nil {
 		err := internal.ReplyWithErrorMessage(a.action.ResponseURL, isPrivate)
 		if err != nil {
