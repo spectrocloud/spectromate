@@ -284,3 +284,23 @@ func CoffeeRatingHandler(action *SlackActionFeedback, ratingScore internal.Menda
 ```
 
 # Cache
+
+The `Cache` interface provides an abstraction layer over the underlying cache technology. The Cache interface defines a contract for a cache system, made up of the following methods:
+
+
+- `StoreHashMap`: This method is intended to store a hash map in the cache system. It accepts a context, a primary key, and a hash map as inputs.
+
+- `GetHashMap`: This method is designed to retrieve a hash map from the cache system. It returns a boolean indicating the existence of the key, the hash map associated with the key, and any error that might occur during the operation.
+
+- `ExpireKey`: This method sets an expiration time on a specific key in the cache system. If there's an error setting the expiration, it will be returned.
+
+- `Ping`: This method checks the connectivity to the cache system and returns an error if there's any issue.
+
+The `RedisCache` type is the default cache provider supported out-of-the-box but you can swap out the cache provider by creating your cache type that complies with the requirements of the `Cache` interface.
+
+
+```go
+type RedisCache struct {
+	redis *redis.Client
+}
+```

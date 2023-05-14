@@ -92,7 +92,7 @@ In this guide, you will learn how you can deploy SpectroMate to Palette's Dev En
 11. [Optional] Create a CNAME record for the load balancer URL and assign it as the record value. In the following steps, use your custom domain as the base URL.
 
 
-12. Use the output URL and use this with your Slack App. Navigate to [https://api.slack.com/apps](https://api.slack.com/apps) to access your Slack apps.
+12. Use the output URL in your Slack App. Navigate to [https://api.slack.com/apps](https://api.slack.com/apps) to access your Slack apps.
 
 
 
@@ -100,7 +100,7 @@ In this guide, you will learn how you can deploy SpectroMate to Palette's Dev En
 
     ![A view of the slack app details view](../static/images/slack_app_main_view.png)
 
-14. Create a new slash command titled `docs` and provide your Ngrok URL to the command. Append `/api/v1/slack` to the end of URL.
+14. Create a new slash command titled `docs` and provide your custom domain name or the exposed load balancer URL in the **Request URL** input field. Append `/api/v1/slack` to the end of URL.
 
     ![View of the Slack slash command page](../static/images/slack_slash_command.png)
 
@@ -109,24 +109,24 @@ In this guide, you will learn how you can deploy SpectroMate to Palette's Dev En
 
 16. From the left **Main Menu**, select **Interactivity & Shortcuts**.
 
-17. Toggle the **Interactvity** button to **On**. 
+17. Toggle the **Interactivity** button to **On**. 
 
 18. Use your load balancer URL OR custom domain name and paste the URL into the text input box. Append `/api/v1/slack/actions` to the end of the URL and save your changes.
 
     ![View of the interactivity options view](../static/images/slack_interactivity_view.png)
 
 
-19. The last step is for you to review your resources in Palette. Navigate back to your browser and open up Palette. 
+19. The last step is for you to review your resources in Palette. Navigate back to your browser and open up [Palette](https://console.spectrocloud.com). 
 
 20. Navigate to the left **Main Menu** and click on **Clusters**.
 
-21. Click on **cluster-1** to access the cluster details view. From the cluster details page you can review the status of your virtual cluster, monitor workloads, download the kubeconfig file, and more.
+21. Click on **cluster-1** to access the cluster details view. From the cluster details page, you can review the status of your virtual cluster, monitor workloads, download the kubeconfig file, and more.
 
     ![View of the cluster details page](../static/images/cluster-details-view.png)
 
 
 
-You have now deployed SpectroMate successfully into your workspace. 
+You have now deployed SpectroMate successfully into your Slack workspace. 
 
 # Validation
 
@@ -149,7 +149,7 @@ You have now deployed SpectroMate successfully into your workspace.
 You can now use SpectroMate in your Slack workspace.
 Palette's Dev Engine reduces the overhead and challenge in deploying containerized applications into a Kubernetes environment. 
 
- SpectroMate comes with Mendable support out-of-the-box. Use SpectroMate to help your organization access information more easily by taking advantage of natural language models trained on your content.
+ SpectroMate comes with Mendable support out-of-the-box. Use SpectroMate to help your organization access information more easily by taking advantage of natural language models trained on your information.
 
 
 If you wish to add new Slack commands and features, you can fork the repository and start adding your own endpoints and commands. We also welcome [contributions](../docs/contributions.md) 🫶

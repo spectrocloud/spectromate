@@ -114,7 +114,7 @@ func ModelFeedbackHandler(action *SlackActionFeedback, ratingScore internal.Mend
 		return
 	}
 
-	log.Info().Msg("Successfully sent the answer back to Slack.")
+	log.Debug().Msg("Successfully sent the answer back to Slack.")
 
 }
 
@@ -173,7 +173,7 @@ func replyWithEmptyMessage(isPrivate bool, rating internal.MendableRatingScore) 
 }
 
 func rateFeedbackMarkdownPayload(content, question, links string, isPrivate bool, rating internal.MendableRatingScore) ([]byte, error) {
-	log.Info().Msgf("Incoming Message: %v", content)
+	log.Debug().Msgf("Incoming Message: %v", content)
 
 	var (
 		responseType    string

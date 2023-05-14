@@ -133,8 +133,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## github.com/mattn/go-colorable
 
 * Name: github.com/mattn/go-colorable
-* Version: v0.1.12
-* License: [MIT](https://github.com/mattn/go-colorable/blob/v0.1.12/LICENSE)
+* Version: v0.1.13
+* License: [MIT](https://github.com/mattn/go-colorable/blob/v0.1.13/LICENSE)
 
 ```
 The MIT License (MIT)
@@ -164,8 +164,8 @@ SOFTWARE.
 ## github.com/mattn/go-isatty
 
 * Name: github.com/mattn/go-isatty
-* Version: v0.0.14
-* License: [MIT](https://github.com/mattn/go-isatty/blob/v0.0.14/LICENSE)
+* Version: v0.0.18
+* License: [MIT](https://github.com/mattn/go-isatty/blob/v0.0.18/LICENSE)
 
 ```
 Copyright (c) Yasuhiro MATSUMOTO <mattn.jp@gmail.com>
@@ -183,8 +183,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ## github.com/redis/go-redis/v9
 
 * Name: github.com/redis/go-redis/v9
-* Version: v9.0.3
-* License: [BSD-2-Clause](https://github.com/redis/go-redis/blob/v9.0.3/LICENSE)
+* Version: v9.0.4
+* License: [BSD-2-Clause](https://github.com/redis/go-redis/blob/v9.0.4/LICENSE)
 
 ```
 Copyright (c) 2013 The github.com/redis/go-redis Authors.
@@ -218,8 +218,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## github.com/rs/zerolog
 
 * Name: github.com/rs/zerolog
-* Version: v1.29.0
-* License: [MIT](https://github.com/rs/zerolog/blob/v1.29.0/LICENSE)
+* Version: v1.29.1
+* License: [MIT](https://github.com/rs/zerolog/blob/v1.29.1/LICENSE)
 
 ```
 MIT License
@@ -274,11 +274,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-## golang.org/x/sys
+## golang.org/x/sys/unix
 
-* Name: golang.org/x/sys
-* Version: v0.0.0-20210927094055-39ccf1dd6fa6
-* License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/39ccf1dd:LICENSE)
+* Name: golang.org/x/sys/unix
+* Version: v0.8.0
+* License: [BSD-3-Clause](https://cs.opensource.google/go/x/sys/+/v0.8.0:LICENSE)
 
 ```
 Copyright (c) 2009 The Go Authors. All rights reserved.

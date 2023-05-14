@@ -175,7 +175,7 @@ func AskCmd(s *SlackAskRequest, isPrivate bool) {
 
 // // createMarkdownPayload creates a Slack payload with a markdown block
 func askMarkdownPayload(content, question, links, title, messageId string, isPrivate bool) ([]byte, error) {
-	log.Info().Msgf("Incoming Message: %v", content)
+	log.Debug().Msgf("Incoming Message: %v", content)
 
 	var responseType string
 	if isPrivate {
