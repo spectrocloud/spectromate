@@ -57,7 +57,7 @@ jobs:
             if git rev-parse "v$VERSION" >/dev/null 2>&1; then
               echo "Tag v$VERSION already exists, skipping tag creation."
             else
-              git tag "v$VERSION"
+              git tag "$VERSION"
               git push --tags
             fi
           fi
