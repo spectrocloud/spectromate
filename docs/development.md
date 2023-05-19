@@ -19,23 +19,28 @@ If you want to work on Spectromate, you will need to install the following softw
 * [A Slack App](https://api.slack.com/apps) available that has access to your target workspace.
 
 ## Setup
-. The instructions that follow assume a directory in your home directory outside of the standard GOPATH.
+The following instructions assume a directory in your home directory outside of the standard GOPATH.
 
-1. Clone the repository into by using the following command.
+1. Clone the repository by using the following command.
 
     ```shell
     $ mkdir -p $HOME/projects/spectromate/; cd $HOME/projects/spectromate/
     $ git clone git@github.com:spectrocloud/spectromate.git
     ```
 
-2. Issue the command `make init`. This will download all the required project dependencies.
-To set up the local development support dependencies, such as Redis and Ngork, use the following command.
+2. Issue the command `make init`. This command will download all the required project dependencies.
+
+    ```shell
+    make init
+    ```
+
+3. The following command is used to set up the local development support dependencies, such as Redis and Ngork.
 
     ```shell
     make start
     ```
 
-3. Copy the URL Ngrok exposed in the output. 
+4. Copy the URL Ngrok exposed in the output. 
 
     ```shell
     $ make start
@@ -47,43 +52,43 @@ To set up the local development support dependencies, such as Redis and Ngork, u
     Ngrok URL: https://76ac-184-179-188-29.ngrok-free.app
     ```
 
-4. Create a `env` file at the root of the project.
+5. Create a `env` file at the root of the project.
 
     ```shell
     touch .env
     ```
 
-5. Populate the **.env** file with your respective credentials.
+6. Populate the **.env** file with your respective credentials.
 
     ```shell
     export SLACK_SIGNING_SECRET=....
     export MENDABLE_API_KEY=....
     ```
 
-6.  Start the local server.
+7. Start the local server.
 
     ```shell
     make server
     ```
 
-7. Source the `.env` file.
+8. Source the `.env` file.
 
     ```shell
     source .env
     ```
 
-8. Navigate to your [Slack app ](https://api.slack.com/apps) and open up your app's details page. 
+9. Navigate to your [Slack app ](https://api.slack.com/apps) and open up your app's details page. 
 
 
-9. You will access both elements highlighted in the image. Start with the first element, by clicking on the left **Main Menu** and selecting **Slash Command**.
+10. You will access both elements highlighted in the image. Start with the first element, by clicking on the left **Main Menu** and selecting **Slash Command**.
 
     ![A view of the slack app details view](../static/images/slack_app_main_view.png)
 
-10. Create a new slash command titled `docs` and provide your Ngrok URL to the command. Append `/api/v1/slack` to the end of URL.
+11. Create a new slash command titled `docs` and provide your Ngrok URL to the command. Append `/api/v1/slack` to the end of URL.
 
     ![View of the Slack slash command page](../static/images/slack_slash_command.png)
 
-11. Save your changes and navigate back to the main details page.
+12. Save your changes and navigate back to the main details page.
 
 
 13. From the left **Main Menu**, select **Interactivity & Shortcuts**.

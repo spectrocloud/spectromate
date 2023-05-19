@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 output "default_message" {
-  value = "Use the following command to create the kubeconfig file lcoally:\n\nterraform output -raw kubeconfig > c1.config && export KUBECONFIG=$(pwd)/c1.config && \\\nkubectl get svc -n spectromate-app-spectromate-ns spectromate-app-spectromate-svc -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'\\\n"
+  value = "Use the following command to create the kubeconfig file lcoally:\n\nterraform output -raw kubeconfig > c1.config && export KUBECONFIG=$(pwd)/c1.config && \\\nkubectl get svc -n spectromate-app-spectromate-ns spectromate-app-spectromate-svc -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
 }
 
 

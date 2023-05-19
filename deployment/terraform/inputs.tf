@@ -10,7 +10,7 @@ variable "project" {
 variable "app_version" {
   type        = string
   description = "The version of the Spectromate application profile in Palette."
-  default     = "1.0.0"
+  default     = "1.0.1"
 }
 
 variable "cluster-group-name" {
@@ -52,7 +52,7 @@ variable "application_name" {
 variable "redis_database_volume_size" {
   type        = string
   description = "The size of the Redis database volume in GiB."
-  default     = "8"
+  default     = "3"
 }
 
 variable "trace_level" {
@@ -73,11 +73,11 @@ variable "cluster_resources" {
   }))
   default = {
     resources = {
-      max_cpu           = 4
-      max_mem_in_mb     = 4096
+      max_cpu           = 6
+      max_mem_in_mb     = 6144
       min_cpu           = 0
       min_mem_in_mb     = 0
-      max_storage_in_gb = "4"
+      max_storage_in_gb = "6"
       min_storage_in_gb = "0"
     }
   }
