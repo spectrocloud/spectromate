@@ -92,7 +92,7 @@ func main() {
 	http.HandleFunc(internal.ApiPrefixV1+"slack/actions", slackActionsRoute.ActionsHTTPHandler)
 
 	log.Info().Msgf("Server is configured for port %s and listing on %s", globalPort, globalHostURL)
-	log.Info().Msgf("API Server version:  v%s", Version)
+	log.Info().Msgf("API Server version:  %s", Version)
 	log.Info().Msgf("Redis is configured for %s:%d", globalRedisURL, globalRedisPort)
 	log.Info().Msgf("Trace level set to: %s", globalTraceLevel)
 	log.Info().Msg("Starting server...")

@@ -9,7 +9,7 @@ You can deploy SpectroMate into a highly-available Kubernetes environment throug
 - Out-of-the-box support for several 3rd party services such as [Postgres](https://docs.spectrocloud.com/devx/app-profile/services/service-listings/postgresql-db), [Vault](https://docs.spectrocloud.com/devx/app-profile/services/service-listings/vault), Kafka and more.
 
 
-In this guide, you will learn how you can deploy SpectroMate to Palette's Dev Engine environment and get started with SpectroMate in less than five minutes.
+In this guide, you will learn how to deploy SpectroMate to Palette's Dev Engine environment and get started with SpectroMate in less than five minutes.
 
 
 > If you want to deploy SpectroMate to an existing Kubernetes cluster, check out the [Generic Kubernetes](../deployment/k8s-generic/README.md) guide.
@@ -19,7 +19,7 @@ In this guide, you will learn how you can deploy SpectroMate to Palette's Dev En
 
 * A [Mendable API](https://www.mendable.ai/) key.
 
-* A Spectro Cloud account. You can signup for a free account [here](https://console.spectrocloud.com/) at no cost, and no credit card is required.
+* A Spectro Cloud account. You can sign up for a free account [here](https://console.spectrocloud.com/) at no cost; no credit card is required.
 
 * [Git](https://git-scm.com/downloads) v2.30.0+ or greater.
 
@@ -40,7 +40,7 @@ In this guide, you will learn how you can deploy SpectroMate to Palette's Dev En
 4. Open up a local terminal window.
 
 
-5.  Clone the repository.
+5. Clone the repository.
     ```shell
     git clone git@github.com:spectrocloud/spectromate.git
     ```
@@ -96,11 +96,11 @@ In this guide, you will learn how you can deploy SpectroMate to Palette's Dev En
 
 
 
-13. You will access both elements highlighted in the image. Start with the first element, by clicking on the left **Main Menu** and selecting **Slash Command**.
+13. You will access both elements highlighted in the image. Start with the first element by clicking on the left **Main Menu** and selecting **Slash Command**.
 
     ![A view of the slack app details view](../static/images/slack_app_main_view.png)
 
-14. Create a new slash command titled `docs` and provide your custom domain name or the exposed load balancer URL in the **Request URL** input field. Append `/api/v1/slack` to the end of URL.
+14. Create a new slash command titled `docs` and provide your custom domain name or the exposed load balancer URL in the **Request URL** input field. Append `/api/v1/slack` to the end of the URL.
 
     ![View of the Slack slash command page](../static/images/slack_slash_command.png)
 
@@ -116,7 +116,7 @@ In this guide, you will learn how you can deploy SpectroMate to Palette's Dev En
     ![View of the interactivity options view](../static/images/slack_interactivity_view.png)
 
 
-19. The last step is for you to review your resources in Palette. Navigate back to your browser and open up [Palette](https://console.spectrocloud.com). 
+19. The last step is for you to review your resources in Palette. Navigate to your browser and open [Palette](https://console.spectrocloud.com). 
 
 20. Navigate to the left **Main Menu** and click on **Clusters**.
 
@@ -149,7 +149,7 @@ You have now deployed SpectroMate successfully into your Slack workspace.
 You can now use SpectroMate in your Slack workspace.
 Palette's Dev Engine reduces the overhead and challenge in deploying containerized applications into a Kubernetes environment. 
 
- SpectroMate comes with Mendable support out-of-the-box. Use SpectroMate to help your organization access information more easily by taking advantage of natural language models trained on your information.
+ SpectroMate comes with Mendable support out-of-the-box. Use SpectroMate to help your organization access information more efficiently by using natural language models trained on your information.
 
 
 If you wish to add new Slack commands and features, you can fork the repository and start adding your own endpoints and commands. We also welcome [contributions](../docs/contributions.md) 🫶
