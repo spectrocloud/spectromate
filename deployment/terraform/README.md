@@ -3,14 +3,14 @@
 | Name | Version |
 |------|---------|
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.5.0 |
-| <a name="requirement_spectrocloud"></a> [spectrocloud](#requirement\_spectrocloud) | >= 0.13.0 |
+| <a name="requirement_spectrocloud"></a> [spectrocloud](#requirement\_spectrocloud) | >= 0.14.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
-| <a name="provider_spectrocloud"></a> [spectrocloud](#provider\_spectrocloud) | 0.13.1 |
+| <a name="provider_spectrocloud"></a> [spectrocloud](#provider\_spectrocloud) | 0.14.0 |
 
 ## Modules
 
