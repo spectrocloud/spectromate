@@ -1,7 +1,7 @@
 # Copyright (c) Spectro Cloud
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.20.3-alpine3.17 as builder
+FROM golang:1.20.4-alpine3.18 as builder
 
 ARG VERSION
 
@@ -15,6 +15,7 @@ FROM alpine:latest
 
 LABEL org.opencontainers.image.source="http://spectrocloud.com/spectromate"
 LABEL org.opencontainers.image.description "Spectromate is an API server with features to support Slack bot integration."
+LABEL org.opencontainers.image.licenses="Apache-2.0"
 
 
 COPY --from=builder /etc/passwd /etc/passwd
