@@ -62,6 +62,8 @@ containerService:
   serviceName: "{{.spectro.system.appdeployment.tiername}}-svc"
   registryUrl: ""
   image: ${image}
+  replicas: 2
+  # ingressHost: "{{.spectro.system.appdeployment.ingress.host}}"
   access: public
   ports:
     - "3000"

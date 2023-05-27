@@ -3,14 +3,14 @@
 | Name | Version |
 |------|---------|
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.5.0 |
-| <a name="requirement_spectrocloud"></a> [spectrocloud](#requirement\_spectrocloud) | >= 0.13.0 |
+| <a name="requirement_spectrocloud"></a> [spectrocloud](#requirement\_spectrocloud) | >= 0.14.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
-| <a name="provider_spectrocloud"></a> [spectrocloud](#provider\_spectrocloud) | 0.13.1 |
+| <a name="provider_spectrocloud"></a> [spectrocloud](#provider\_spectrocloud) | 0.14.0 |
 
 ## Modules
 
@@ -44,7 +44,7 @@ No modules.
 | <a name="input_redis_database_volume_size"></a> [redis\_database\_volume\_size](#input\_redis\_database\_volume\_size) | The size of the Redis database volume in GiB. | `string` | `"3"` | no |
 | <a name="input_slack_signing_secret"></a> [slack\_signing\_secret](#input\_slack\_signing\_secret) | The value of the Slack Signing Secret. Set using TF\_VAR environment variable. | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | The default tags to apply to Palette resources | `list(string)` | <pre>[<br>  "spectro-cloud-education",<br>  "app:spectromate",<br>  "repository:spectrocloud/spectromate",<br>  "terraform_managed:true"<br>]</pre> | no |
-| <a name="input_trace_level"></a> [trace\_level](#input\_trace\_level) | The trace level for the Spectromate application. | `string` | `"DEBUG"` | no |
+| <a name="input_trace_level"></a> [trace\_level](#input\_trace\_level) | The trace level for the Spectromate application. | `string` | `"INFO"` | no |
 
 ## Outputs
 

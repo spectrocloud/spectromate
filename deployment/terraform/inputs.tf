@@ -58,7 +58,7 @@ variable "redis_database_volume_size" {
 variable "trace_level" {
   type        = string
   description = "The trace level for the Spectromate application."
-  default     = "DEBUG"
+  default     = "INFO"
 }
 
 variable "cluster_resources" {
