@@ -51,18 +51,17 @@ In this guide, you will learn how to deploy SpectroMate to Palette's Dev Engine 
     cd deployment/terraform/
     ```
 7. Export your credentials as environment variables. Replace `...` with your respective value.
+    
     ```shell
-    # Slack Secret
-    export TF_VAR_slack_signing_secret=...
+    export TF_VAR_slack_signing_secret=
     ```
+    
     ```shell
-    # Mendable API key
-    export TF_VAR_mendable_api_key=...
+    export TF_VAR_mendable_api_key=
     ```
 
     ```shell
-    # Spectro Cloud API key
-    export SPECTROCLOUD_APIKEY=...
+    export SPECTROCLOUD_APIKEY=
     ```
 7. Initialize Terraform.
 
