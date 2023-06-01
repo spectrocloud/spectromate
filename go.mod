@@ -6,7 +6,7 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/schema v1.2.0
-	github.com/redis/go-redis/v9 v9.0.4
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.3
 	go.uber.org/automaxprocs v1.5.2
