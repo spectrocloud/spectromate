@@ -18,15 +18,19 @@ SpectroMate comes with out-of-the-box support for [Mendable](https://www.mendabl
 
   ![Example of a Slack question asked to Mendable](./static/images/mendable_ask_example.png)
 
-SpectroMate is optimized for deployment in [Palette](https://console.spectrocloud.com) using Palette's Dev Engine (PDE) platform. 
+<!-- SpectroMate is optimized for deployment in [Palette](https://console.spectrocloud.com) using Palette's Dev Engine (PDE) platform. 
 
-Palette's PDE simplifies the deployment and management of SpectroMate. You can deploy SpectroMate to Palette and use the [free-tier resources](https://docs.spectrocloud.com/getting-started/palette-freemium). With Palette PDE, you can deploy SpectroMate at no cost and in under five minutes! Check out the [Getting Started](./docs/getting-started.md) guide to learn more.
+Palette's PDE simplifies the deployment and management of SpectroMate. You can deploy SpectroMate to Palette and use the [free-tier resources](https://docs.spectrocloud.com/getting-started/palette-freemium). With Palette PDE, you can deploy SpectroMate at no cost and in under five minutes! Check out the [Getting Started](./docs/getting-started.md) guide to learn more. -->
 
 ---
 
 ## Getting Started 🚀
 
-To get started with Spectromate check out the [Getting Started](./docs/getting-started.md) guide.
+Select the target platform to view its Getting Started guide.
+
+- [Kubernetes](/deployment/k8s-generic/README.md)
+
+- [Palette Dev Engine](/docs/getting-started.md)
 
 ---
 
