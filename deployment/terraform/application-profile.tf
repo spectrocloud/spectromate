@@ -27,5 +27,17 @@ resource "spectrocloud_application_profile" "spectromate" {
       trace_level          = var.trace_level
     })
   }
+  pack {
+    name            = "spectromate-community"
+    type            = data.spectrocloud_pack_simple.container_pack.type
+    registry_uid    = data.spectrocloud_registry.public_registry.id
+    source_app_tier = data.spectrocloud_pack_simple.container_pack.id
+    values = templatefile("manifests/container.yaml", {
+      image                = var.image
+      slack_signing_secret = var.slack_signing_secret_community
+      mendable_api_key     = var.mendable_api_key
+      trace_level          = "INFOs"
+    })
+  }
   tags = var.tags
 }

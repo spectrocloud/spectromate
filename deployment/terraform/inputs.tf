@@ -25,6 +25,12 @@ variable "slack_signing_secret" {
   sensitive   = true
 }
 
+variable "slack_signing_secret_community" {
+  type        = string
+  description = "The value of the Slack Signing Secret for the community channel. Set using TF_VAR environment variable."
+  sensitive   = true
+}
+
 variable "mendable_api_key" {
   type        = string
   description = "The value of the Mendable API Key. Set using TF_VAR environment variable."
@@ -73,11 +79,11 @@ variable "cluster_resources" {
   }))
   default = {
     resources = {
-      max_cpu           = 6
-      max_mem_in_mb     = 6144
+      max_cpu           = 12
+      max_mem_in_mb     = 16384
       min_cpu           = 0
       min_mem_in_mb     = 0
-      max_storage_in_gb = "6"
+      max_storage_in_gb = "20"
       min_storage_in_gb = "0"
     }
   }
