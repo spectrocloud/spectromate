@@ -9,7 +9,7 @@ require (
 	github.com/redis/go-redis/v9 v9.0.4
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.3
-	go.uber.org/automaxprocs v1.5.2
+	go.uber.org/automaxprocs v1.5.3
 )
 
 require (
