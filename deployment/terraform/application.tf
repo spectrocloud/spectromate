@@ -6,6 +6,7 @@ resource "spectrocloud_application" "spectromate" {
   application_profile_uid = spectrocloud_application_profile.spectromate.id
 
   config {
+    cluster_context= "system"
     cluster_name = spectrocloud_virtual_cluster.cluster-1.name
     cluster_uid  = spectrocloud_virtual_cluster.cluster-1.id
   }
