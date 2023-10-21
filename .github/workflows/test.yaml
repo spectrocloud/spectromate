@@ -66,6 +66,57 @@ jobs:
       run: |
         go test -race ./...
 
+  release-preview:
+    needs: [run-ci]
+    runs-on: ubuntu-latest
+
+    outputs:
+      VERSION: ${{ steps.tag.outputs.VERSION }}
+      PREV_VERSION: ${{ steps.tag.outputs.PREV_VERSION }}
+      SAME_VERSION: ${{ steps.tag.outputs.SAME_VERSION }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: get-tags 
+        run: git fetch --force --tags
+
+      - name: Get svu
+        run: |
+          URL="https://github.com/caarlos0/svu/releases/download/v${SVU_VERSION}/svu_${SVU_VERSION}_linux_amd64.tar.gz"
+          wget --quiet $URL --output-document svu.tar.gz
+          tar -xzf svu.tar.gz
+          chmod +x svu
+          sudo mv svu /usr/local/bin/
+
+  goreleaser:
+    needs: [tag]
+    if: ${{ needs.tag.outputs.SAME_VERSION == 'false' }}
+    runs-on: ubuntu-latest
+    env:
+      GORELEASER_CURRENT_TAG: ${{ needs.tag.outputs.VERSION }}
+      GORELEASER_PREVIOUS_TAG: ${{ needs.tag.outputs.PREV_VERSION }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - run: git fetch --force --tags
+      - uses: actions/setup-go@v4
+        with:
+          check-latest: true    
+      - uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          args: release --clean --snapshot --skip-publish
+          version: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
   compile:
     name: Compile validation
     needs: [run-ci,linting]

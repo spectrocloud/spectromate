@@ -7,7 +7,7 @@ output "default_message" {
 
 
 output "kubeconfig" {
-  value = spectrocloud_virtual_cluster.cluster-1.kubeconfig
+  value = spectrocloud_virtual_cluster.cluster-1.admin_kube_config
 
   sensitive = true
 
