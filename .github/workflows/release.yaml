@@ -12,7 +12,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
-  SVU_VERSION: 1.10.2
+  SVU_VERSION: 1.11.0
 
 jobs:
   tag:
@@ -64,6 +64,7 @@ jobs:
 
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "PREV_VERSION=$PREV_VERSION" >> $GITHUB_OUTPUT
+
   goreleaser:
     needs: [tag]
     if: ${{ needs.tag.outputs.SAME_VERSION == 'false' }}
@@ -78,10 +79,14 @@ jobs:
           fetch-depth: 0
 
       - run: git fetch --force --tags
+
       - uses: actions/setup-go@v4
         with:
-          check-latest: true    
-      - uses: goreleaser/goreleaser-action@v4
+          go-version: '1.21'
+          check-latest: true
+
+
+      - uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
           args: release --clean
