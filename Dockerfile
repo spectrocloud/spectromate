@@ -1,7 +1,7 @@
 # Copyright (c) Spectro Cloud
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.20.4-alpine3.18 as builder
+FROM golang:1.21.3-alpine3.18 as builder
 
 ARG VERSION
 
@@ -26,6 +26,7 @@ COPY entrypoint.sh /usr/bin/
 RUN apk -U upgrade && apk add bash jq git --no-cache && mkdir /packs && chown -R appuser:appuser /packs && \
 mkdir -p /var/log/spectromate && chown -R appuser:appuser /var/log/spectromate && \
 touch /var/log/spectromate.log && chown appuser:appuser /var/log/spectromate.log && chmod 664 /var/log/spectromate.log
+
 USER appuser
 
 CMD ["/usr/bin/entrypoint.sh"]

@@ -24,7 +24,7 @@ jobs:
       SAME_VERSION: ${{ steps.tag.outputs.SAME_VERSION }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -95,11 +95,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
+        go-version: '1.21'
         check-latest: true
 
     - name: Set up QEMU

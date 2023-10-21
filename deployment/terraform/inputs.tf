@@ -34,7 +34,7 @@ variable "mendable_api_key" {
 variable "image" {
   type        = string
   description = "The Spectromate image to deploy."
-  default     = "ghcr.io/spectrocloud/spectromate:v1.0.1"
+  default     = "ghcr.io/spectrocloud/spectromate:v1.0.2"
 }
 
 variable "cluster_name" {
