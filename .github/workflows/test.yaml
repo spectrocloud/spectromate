@@ -10,6 +10,7 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
   MENDABLE_API_KEY: ${{secrets.MENDABLE_API_KEY}}
   SLACK_SIGNING_SECRET: ${{secrets.SLACK_SIGNING_SECRET}}
+  SVU_VERSION: 1.11.0
 
 
 concurrency:
