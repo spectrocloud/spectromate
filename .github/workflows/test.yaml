@@ -120,7 +120,6 @@ jobs:
 
   goreleaser:
     needs: [release-preview]
-    if: ${{ needs.tag.outputs.SAME_VERSION == 'false' }}
     runs-on: ubuntu-latest
     env:
       GORELEASER_CURRENT_TAG: ${{ needs.tag.outputs.VERSION }}
