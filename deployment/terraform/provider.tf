@@ -4,11 +4,11 @@
 terraform {
   required_providers {
     spectrocloud = {
-      version = ">= 0.14.0"
+      version = ">= 0.15.0"
       source  = "spectrocloud/spectrocloud"
     }
     random = {
-      version = ">= 3.5.0"
+      version = ">= 3.5.1"
       source  = "hashicorp/random"
     }
   }
