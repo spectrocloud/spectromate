@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/golang/mock v1.6.0
-	github.com/gorilla/schema v1.2.0
+	github.com/gorilla/schema v1.2.1
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.8.4
