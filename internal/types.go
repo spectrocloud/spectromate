@@ -40,16 +40,18 @@ type MendablePayload struct {
 	Answer struct {
 		Text string `json:"text"`
 	} `json:"answer"`
-	MessageID int               `json:"message_id"`
-	Sources   []MendableSources `json:"sources"`
+	MessageID  int               `json:"message_id"`
+	Sources    []MendableSources `json:"sources"`
+	Confidence float64           `json:"confidence_score"`
 }
 
 type MendableSources struct {
-	ID      int     `json:"id"`
-	Content string  `json:"content"`
-	Score   float64 `json:"score"`
-	Date    *string `json:"date"`
-	Link    string  `json:"link"`
+	ID             int     `json:"id"`
+	Content        string  `json:"content"`
+	Score          float64 `json:"score"`
+	Date           *string `json:"date"`
+	Link           string  `json:"link"`
+	RelevancyScore float64 `json:"relevance_score"`
 }
 
 type MendableQueryResponse struct {
@@ -58,6 +60,7 @@ type MendableQueryResponse struct {
 	Question       string
 	Answer         string
 	Links          []string
+	Confidence     string
 }
 
 /*

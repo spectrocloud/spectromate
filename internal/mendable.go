@@ -170,6 +170,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL, 
 		Question:       query.Question,
 		Answer:         result.Answer.Text,
 		Links:          uniqueLinks,
+		Confidence:     fmt.Sprintf("%.2f", result.Confidence),
 	}
 
 	if mendableResponse.Answer == "" {
@@ -177,7 +178,8 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL, 
 		mendableResponse.Answer = DefaultNotFoundResponse
 	}
 
-	log.Debug().Msgf("Mendable Question response: %v", mendableResponse.Answer)
+	// log.Debug().Msgf("Mendable Question response: %v", mendableResponse.Answer)
+	log.Debug().Msgf("Mendable Confidence response: %v", mendableResponse.Confidence)
 
 	return mendableResponse, nil
 
