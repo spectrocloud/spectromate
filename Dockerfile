@@ -1,7 +1,7 @@
 # Copyright (c) Spectro Cloud
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.21.3-alpine3.18 as builder
+FROM golang:1.21.5-alpine3.18 as builder
 
 ARG VERSION
 

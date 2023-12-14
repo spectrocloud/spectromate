@@ -170,6 +170,7 @@ func SendDocsQuery(ctx context.Context, query MendableRequestPayload, queryURL, 
 		Question:       query.Question,
 		Answer:         result.Answer.Text,
 		Links:          uniqueLinks,
+		Confidence:     fmt.Sprintf("%.2f", result.Confidence),
 	}
 
 	if mendableResponse.Answer == "" {
