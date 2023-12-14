@@ -10,7 +10,7 @@ variable "project" {
 variable "app_version" {
   type        = string
   description = "The version of the Spectromate application profile in Palette."
-  default     = "1.0.5"
+  default     = "1.0.6"
 }
 
 variable "cluster-group-name" {
