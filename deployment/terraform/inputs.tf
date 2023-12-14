@@ -10,7 +10,7 @@ variable "project" {
 variable "app_version" {
   type        = string
   description = "The version of the Spectromate application profile in Palette."
-  default     = "1.0.6"
+  default     = "1.0.7"
 }
 
 variable "cluster-group-name" {
@@ -34,7 +34,7 @@ variable "mendable_api_key" {
 variable "image" {
   type        = string
   description = "The Spectromate image to deploy."
-  default     = "ghcr.io/spectrocloud/spectromate:v1.0.6"
+  default     = "ghcr.io/spectrocloud/spectromate:v1.0.7"
 }
 
 variable "cluster_name" {
