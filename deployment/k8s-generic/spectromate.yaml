@@ -101,7 +101,7 @@ spec:
     spec:
       containers:
       - name: slackbot
-        image: ghcr.io/spectrocloud/spectromate:v1.0.2
+        image: ghcr.io/spectrocloud/spectromate:v1.0.6
         ports:
         - containerPort: 3000
           name: slackbot
