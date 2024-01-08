@@ -88,6 +88,7 @@ To learn more about SpectroMate, review the [internal](./docs/internal.md) techn
 | Verify Slack signature| ✅ | Verification of Slack signature is applied to all Slack endpoints.|
 | Metrics | ❌ | Currently unavailable. |
 | Proxy   |✅ | SpectroMate will honor the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables.|
+| Image Verification | ✅ | We sign our images through [Cosign](https://docs.sigstore.dev/signing/quickstart/). Review the [Image Verification](./docs/image-verification.md) page to learn more. |
 
 
 :warning: There is a limitation with `pask` messages when submitting feedback. The answer response message is replaced with a feedback acknowledgment message. This behavior stems from the Slack API not including the original message when handling action events from an ephemeral message.
