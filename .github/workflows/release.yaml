@@ -123,6 +123,7 @@ jobs:
 
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v4.0.0
+      id: build-and-push
       with:
         context: .
         platforms: linux/amd64,linux/arm64
@@ -130,3 +131,19 @@ jobs:
         tags: ghcr.io/${{ github.repository }}:${{ needs.tag.outputs.VERSION }}
         build-args: |
           VERSION=${{ needs.tag.outputs.VERSION }}
+
+    - uses: sigstore/cosign-installer@v3.3.0
+
+    - name: Image Signing
+      run: |
+        cosign sign --yes \
+        -a "repo=${{ github.repository }}" \
+        -a "workflow=${{ github.workflow }}" \
+        -a "ref=${{ github.sha }}" \
+        -a "owner=Spectro Cloud" \
+        --key env://COSIGN_PRIVATE_KEY --recursive "${TAGS}@${DIGEST}"
+      env:
+        TAGS: ghcr.io/${{ github.repository }}:${{ needs.tag.outputs.VERSION }}
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        DIGEST: ${{ steps.build-and-push.outputs.digest }}
