@@ -3,11 +3,8 @@
 The Spectromate container image is signed using [Sigstore's](https://sigstore.dev/) Cosign. The container image is signed using a cryptographic key pair that is private and stored internally. The public key is available in the official Spectro Cloud documentation repository at [**static/cosign.pub**](https://raw.githubusercontent.com/spectrocloud/librarium/master/static/cosign.pub). Use the public key to verify the authenticity of the container image. You can learn more about the container image signing process by reviewing the [Signing Containers](https://docs.sigstore.dev/signing/signing_with_containers) documentation page.
 
 
-:::info
-
-Cosign generates a key pair that uses the ECDSA-P256 algorithm for the signature and SHA256 for hashes. The keys are stored in PEM-encoded PKCS8 format.
-
-:::
+> [!NOTE]
+> Cosign generates a key pair that uses the ECDSA-P256 algorithm for the signature and SHA256 for hashes. The keys are stored in PEM-encoded PKCS8 format.
 
 
 Use the following command to verify the authenticity of the container image. Replace the image tag with the version you want to verify.
@@ -20,7 +17,7 @@ ghcr.io/spectrocloud/spectromate:v1.0.7
 If the container image is valid, the following output is displayed. The example output is formatted using `jq` to improve readability.
 
 ```shell hideClipboard
-Verification for ghcr.io/spectrocloud/librarium:nightly --
+Verification for ghcr.io/spectrocloud/spectromate:v1.0.7 --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - Existence of the claims in the transparency log was verified offline
@@ -56,11 +53,8 @@ The following checks were performed on each of these signatures:
 ```
 
 
-:::danger
-
-Do not use the container image if the authenticity cannot be verified. Verify you downloaded the correct public key and that the container image is from `ghcr.io/spectrocloud/spectromate`.
-
-:::
+> [!CAUTION]
+> Do not use the container image if the authenticity cannot be verified. Verify you downloaded the correct public key and that the container image is from `ghcr.io/spectrocloud/spectromate`.
 
 If the container image is not valid, an error is displayed. The following example shows an error when the container image is not valid.
 
