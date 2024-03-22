@@ -34,7 +34,7 @@ variable "mendable_api_key" {
 variable "image" {
   type        = string
   description = "The Spectromate image to deploy."
-  default     = "ghcr.io/spectrocloud/spectromate:v1.0.7"
+  default     = "ghcr.io/spectrocloud/spectromate:v1.0.9"
 }
 
 variable "cluster_name" {
@@ -59,6 +59,12 @@ variable "trace_level" {
   type        = string
   description = "The trace level for the Spectromate application."
   default     = "INFO"
+}
+
+variable "redis_password" {
+  type        = string
+  description = "The password for the Redis database."
+  default     = ""
 }
 
 variable "cluster_resources" {
