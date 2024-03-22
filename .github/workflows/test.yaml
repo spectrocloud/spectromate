@@ -2,16 +2,15 @@ name: Test & Validate
 
 on:
   pull_request:
-    types: ['synchronize', 'opened']
+    types: ["synchronize", "opened"]
     branches:
-    - main
+      - main
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
   MENDABLE_API_KEY: ${{secrets.MENDABLE_API_KEY}}
   SLACK_SIGNING_SECRET: ${{secrets.SLACK_SIGNING_SECRET}}
   SVU_VERSION: 1.11.0
-
 
 concurrency:
   group: test-${{ github.ref }}
@@ -25,47 +24,46 @@ jobs:
         shell: bash
     if: ${{ !github.event.pull_request.draft }}
     steps:
-    # If the condition above is not met, aka, the PR is not in draft status, then this step is skipped.
-    # Because this step is part of the critical path, omission of this step will result in remaining CI steps not gettinge executed.
-    # As of 8/8/2022 there is now way to enforce this beahvior in GitHub Actions CI.
+      # If the condition above is not met, aka, the PR is not in draft status, then this step is skipped.
+      # Because this step is part of the critical path, omission of this step will result in remaining CI steps not gettinge executed.
+      # As of 8/8/2022 there is now way to enforce this beahvior in GitHub Actions CI.
       - run: exit 0
 
   linting:
     needs: [run-ci]
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'
-        check-latest: true
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.22"
+          check-latest: true
 
-    - name: Lint Internal Package
-      uses: golangci/golangci-lint-action@v3
-      with:
-        args: --verbose --timeout 5m
+      - name: Lint Internal Package
+        uses: golangci/golangci-lint-action@v3
+        with:
+          args: --verbose --timeout 5m
 
   test:
     name: Test
-    needs: [run-ci,linting]
+    needs: [run-ci, linting]
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22"
+          check-latest: true
+        id: go
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'
-        check-latest: true
-      id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
-
-    - name: Go Tests
-      run: |
-        go test -race ./...
+      - name: Go Tests
+        run: |
+          go test -race ./...
 
   release-preview:
     needs: [run-ci]
@@ -81,7 +79,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: get-tags 
+      - name: get-tags
         run: git fetch --force --tags
 
       - name: Get svu
@@ -126,7 +124,7 @@ jobs:
       GORELEASER_PREVIOUS_TAG: ${{ needs.tag.outputs.PREV_VERSION }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -134,8 +132,8 @@ jobs:
 
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
-          check-latest: true 
+          go-version: "1.22"
+          check-latest: true
 
       - uses: goreleaser/goreleaser-action@v5
         with:
@@ -145,64 +143,61 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
   compile:
     name: Compile validation
-    needs: [run-ci,linting]
+    needs: [run-ci, linting]
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22"
+          check-latest: true
+        id: go
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'
-        check-latest: true
-      id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          args: -v
 
-    - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v3
-      with:  
-        args: -v
-  
-    - name: build
-      run: |
-        go build -race -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=1.0.0'" -o=spectromate -v
+      - name: build
+        run: |
+          go build -race -ldflags="-X 'spectrocloud.com/spectromate/cmd.VersionString=1.0.0'" -o=spectromate -v
 
   Docker:
-    needs: [run-ci,linting,test,compile]
+    needs: [run-ci, linting, test, compile]
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'
-        check-latest: true
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.22"
+          check-latest: true
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
+      - name: Login to GHCR
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Login to GHCR
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v4.0.0
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ghcr.io/${{ github.repository }}:dev
-        build-args: |
-          VERSION=1.0.0
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4.0.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/${{ github.repository }}:dev
+          build-args: |
+            VERSION=1.0.0
